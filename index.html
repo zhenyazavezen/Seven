@@ -557,28 +557,28 @@
         ];
                 const specialWorkouts = [
             {
-                title: "Офисное кресло",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Вы и так уже в кресле, так используйте его для этой тренировки!",
-                link: "https://t.me/c/2527751508/160/393"
-            },
-            {
-                title: "Утреннее пробуждение",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Эта тренировка пробуждает тело ото сна, и вы будете готовы бросить вызов всему миру.",
-                link: "https://t.me/c/2527751508/160/394"
-            },
-            {
                 title: "Офис",
                 meta: "12 упражнений • 07:50 мин.",
                 desc: "Сделайте перерыв и очистите сознание. Эта тренировка стимулирует кровообращение и может выполняться в офисе.",
                 link: "https://t.me/c/2527751508/160/395"
             },
             {
+                title: "Офисное кресло",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Вы и так уже в кресле, так используйте его для этой тренировки!",
+                link: "https://t.me/c/2527751508/160/393"
+            },
+            {
                 title: "После бега",
                 meta: "12 упражнений • 07:50 мин.",
                 desc: "Дополните бег каким-либо силовым упражнением с растягиванием во второй половине.",
                 link: "https://t.me/c/2527751508/160/396"
+            },
+            {
+                title: "Утреннее пробуждение",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Эта тренировка пробуждает тело ото сна, и вы будете готовы бросить вызов всему миру.",
+                link: "https://t.me/c/2527751508/160/394"
             }
         ];
         
@@ -715,7 +715,7 @@
 
         
 
-            if (currentCategoryKey === 'start' || currentCategoryKey === 'weight_loss' || currentCategoryKey === 'mobility' || currentCategoryKey === 'stay_in_shape') {
+            if (currentCategoryKey === 'start' || currentCategoryKey === 'weight_loss' || currentCategoryKey === 'mobility' || currentCategoryKey === 'stay_in_shape' || currentCategoryKey === 'special') {
                 const levelTitle = document.createElement('div');
                 levelTitle.className = 'level-title';
                 levelTitle.textContent = 'Новичок';
@@ -759,6 +759,12 @@
                     confidentTitle.textContent = 'Уверенный';
                     container.appendChild(confidentTitle);
                 }
+                if (currentCategoryKey === 'special' && index === 2) {
+                    const midTitle = document.createElement('div');
+                    midTitle.className = 'level-title';
+                    midTitle.textContent = 'Средний';
+                    container.appendChild(midTitle);
+                }
 
                 const card = document.createElement('div');
                 card.className = 'workout-card';
@@ -798,7 +804,7 @@
         subtitleEl.innerHTML = 'Быстрая и эффективная тренировка для тонуса мышц и повышения выносливости.';
     } else if (categoryName === 'special') {
     titleEl.innerHTML = '🎯 Специальные';
-    subtitleEl.innerHTML = 'Специальные комплексы упражнений';
+    subtitleEl.innerHTML = 'Тренировки на любой случай: идеальное утреннее пробуждение, подготовка к пробежке, или прямо в офисе!';
     } else if (categoryName === 'beach') {
         titleEl.innerHTML = '🏖️ К пляжу готов';
         subtitleEl.innerHTML = 'Серия тренировок для рельефа и пляжной формы';
