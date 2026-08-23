@@ -303,12 +303,6 @@
                 link: "https://t.me/c/2527751508/2/58"
             },
             {
-                title: "Учебка",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Сосредоточьтесь на основных группах мышц. Попробуйте высокоинтенсивную тренировку, которая заставит вас попотеть.",
-                link: "https://t.me/c/2527751508/2/71"
-            },
-            {
                 title: "Спина и передняя часть",
                 meta: "12 упражнений • 07:50 мин.",
                 desc: "Если давать каждой половине тела отдохнуть по очереди, вы сможете быстрее восстановиться между упражнениями. И выложиться ещё больше.",
@@ -331,6 +325,12 @@
                 meta: "12 упражнений • 07:50 мин.",
                 desc: "Прокачайте свою кровь и укрепите мышцы с помощью этой комфортной для суставов тренировки.",
                 link: "https://t.me/c/2527751508/2/86"
+            },
+            {
+                title: "Учебка",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Сосредоточьтесь на основных группах мышц. Попробуйте высокоинтенсивную тренировку, которая заставит вас попотеть.",
+                link: "https://t.me/c/2527751508/2/71"
             }
         ];
 
@@ -722,7 +722,14 @@
                 container.appendChild(levelTitle);
             }
 
-            targetList.forEach(item => {
+            targetList.forEach((item, index) => {
+                if (currentCategoryKey === 'start' && index === 8) {
+                    const midTitle = document.createElement('div');
+                    midTitle.className = 'level-title';
+                    midTitle.textContent = 'Средний';
+                    container.appendChild(midTitle);
+                }
+
                 const card = document.createElement('div');
                 card.className = 'workout-card';
                 card.onclick = () => handleWorkoutClick(item.link);
