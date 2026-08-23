@@ -214,12 +214,11 @@
         </div>
     </div>
 
-       <!-- ЭКРАН ПОДРАЗДЕЛОВ -->
+    <!-- ЭКРАН ПОДРАЗДЕЛОВ -->
     <div id="sub-screen" class="hidden">
         <button class="back-btn" onclick="goBackToMain()">← Назад к категориям</button>
-                <h1 id="sub-title">Для начала</h1>
-        <div class="subtitle" id="sub-subtitle">Начните свое фитнес-путешествие с подборкой тренировок для всего тела, чтобы повысить общий уровень физподготовки.</div>
-        <h2 style="margin-top: 20px;">Новичок</h2>
+        <h1 id="sub-title">⚡ Заголовок</h1>
+        <div class="subtitle" id="sub-subtitle">Описание раздела</div>
 
         <div id="workouts-list">
             <!-- Сюда динамически подгружаются тренировки -->
@@ -227,108 +226,107 @@
     </div>
 
     <script>
-    let tg = window.Telegram.WebApp;
-    tg.expand();
+        let tg = window.Telegram.WebApp;
+        tg.expand();
 
-    const INVOICE_LINK = 'https://t.me/$eM-_apukiUtDGGAAJhEa2wWnaYQ';
-    const DEV_USERNAME = 'zhenya_zavezen';
-    let isSubscribed = false;
-    let currentCategoryKey = '';
+        const INVOICE_LINK = 'https://t.me/$eM-_apukiUtDGgAAjhEa2eMnaYQ';
+        const DEV_USERNAME = 'zhenya_zavezen';
+        let isSubscribed = false;
+        let currentCategoryKey = '';
 
-    // Данные для раздела «Для начала»
-    const startWorkouts = [
-        {
-            title: "Нижняя часть",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Цель этой тренировки ягодицы и ноги с идеальным балансом силы и кардио.",
-            link: "https://t.me/c/2527751508/2/65"
-        },
-        {
-            title: "Гибкость",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Увеличьте амплитуду движений и уменьшите ограничения мышц с помощью этого упражнения на растяжение всего корпуса.",
-            link: "https://t.me/c/2527751508/2/70"
-        },
-        {
-            title: "Легкая форма",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Приведите себя в форму, выполняя эту простую тренировку, которая подойдет любому.",
-            link: "https://t.me/c/2527751508/2/74"
-        },
-        {
-            title: "На четвереньках",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Этот набор упражнений на полу уменьшает риск травм, а также помогает поддерживать себя в должной форме и формировать сильное тело.",
-            link: "https://t.me/c/2527751508/2/81"
-        },
-        {
-            title: "Разогрев",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Отличный способ начать день. Разогрейте мышцы и суставы для лучших результатов.",
-            link: "https://t.me/c/2527751508/2/82"
-        },
-        {
-            title: "Я здесь первый раз",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Впервые в Seven? Эти простые упражнения выработают новую привычку на всю жизнь!",
-            link: "https://t.me/c/2527751508/2/83"
-        },
-        {
-            title: "Старший",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Никогда не поздно для силовых тренировок. Эта тренировка подойдет любому новичку, а также специально разработана для тех, кому больше 65 лет.",
-            link: "https://t.me/c/2527751508/2/84"
-        },
-        {
-            title: "Работа над корпусом",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Ищете идеальное начало для своего фитнес-курса? Вы его нашли!",
-            link: "https://t.me/c/2527751508/2/85"
-        },
-        {
-            title: "Все тело",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Научно доказано, что так обеспечиваются самые лучшие результаты в кратчайшие сроки. Этот классический ВИТ имеет все необходимое для достижения ваших целей.",
-            link: "https://t.me/c/2527751508/2/57"
-        },
-        {
-            title: "Верхняя часть",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Руки, плечи, грудь и верхняя часть спины всего здесь есть отличные тренировки.",
-            link: "https://t.me/c/2527751508/2/58"
-        },
-        {
-            title: "Учебка",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Сосредоточьтесь на основных группах мышц. Попробуйте высокоинтенсивную тренировку, которая заставит вас попотеть.",
-            link: "https://t.me/c/2527751508/2/71"
-        },
-        {
-            title: "Спина и передняя часть",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Если давать каждой половине тела отдохнуть по очереди, вы сможете быстрее восстановиться между упражнениями. И выложиться ещё больше.",
-            link: "https://t.me/c/2527751508/2/72"
-        },
-        {
-            title: "Верх и низ",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Если давать каждой половине тела отдохнуть по очереди, вы сможете быстрее восстановиться между упражнениями. И выложиться ещё больше.",
-            link: "https://t.me/c/2527751508/2/73"
-        },
-        {
-            title: "Функциональная (новичок)",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Доведите каждую часть своего тела до предела возможностей при помощи этих разнообразных функциональных движений.",
-            link: "https://t.me/c/2527751508/2/75"
-        },
-        {
-            title: "Малая ударная нагрузка",
-            meta: "12 упражнений • 07:50 мин.",
-            desc: "Прокачайте свою кровь и укрепите мышцы с помощью этой комфортной для суставов тренировки.",
-            link: "https://t.me/c/2527751508/2/86"
-        }
-    ];
- 
+        // Данные для раздела «Для начала»
+        const startWorkouts = [
+            {
+                title: "Все тело",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Научно доказано, что так обеспечиваются самые лучшие результаты в кратчайшие сроки. Этот классический ВИТ имеет все необходимое для достижения ваших целей.",
+                link: "https://t.me/c/2527751508/2/57"
+            },
+            {
+                title: "Верхняя часть",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Руки, плечи, грудь и верхняя часть спины всего здесь есть отличные тренировки.",
+                link: "https://t.me/c/2527751508/2/58"
+            },
+            {
+                title: "Нижняя часть",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Цель этой тренировки ягодицы и ноги с идеальным балансом силы и кардио.",
+                link: "https://t.me/c/2527751508/2/65"
+            },
+            {
+                title: "Гибкость",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Увеличьте амплитуду движений и уменьшите ограничения мышц с помощью этого упражнения на растяжение всего корпуса.",
+                link: "https://t.me/c/2527751508/2/70"
+            },
+            {
+                title: "Учебка",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Сосредоточьтесь на основных группах мышц. Попробуйте высокоинтенсивную тренировку, которая заставит вас попотеть.",
+                link: "https://t.me/c/2527751508/2/71"
+            },
+            {
+                title: "Спина и передняя часть",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Если давать каждой половине тела отдохнуть по очереди, вы сможете быстрее восстановиться между упражнениями. И выложиться ещё больше.",
+                link: "https://t.me/c/2527751508/2/72"
+            },
+            {
+                title: "Верх и низ",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Если давать каждой половине тела отдохнуть по очереди, вы сможете быстрее восстановиться между упражнениями. И выложиться ещё больше.",
+                link: "https://t.me/c/2527751508/2/73"
+            },
+            {
+                title: "Легкая форма",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Приведите себя в форму, выполняя эту простую тренировку, которая подойдет любому.",
+                link: "https://t.me/c/2527751508/2/74"
+            },
+            {
+                title: "Функциональная (новичок)",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Доведите каждую часть своего тела до предела возможностей при помощи этих разнообразных функциональных движений.",
+                link: "https://t.me/c/2527751508/2/75"
+            },
+            {
+                title: "На четвереньках",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Этот набор упражнений на полу уменьшает риск травм, а также помогает поддерживать себя в должной форме и формировать сильное тело.",
+                link: "https://t.me/c/2527751508/2/81"
+            },
+            {
+                title: "Разогрев",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Отличный способ начать день. Разогрейте мышцы и суставы для лучших результатов.",
+                link: "https://t.me/c/2527751508/2/82"
+            },
+            {
+                title: "Я здесь первый раз",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Впервые в Seven? Эти простые упражнения выработают новую привычку на всю жизнь!",
+                link: "https://t.me/c/2527751508/2/83"
+            },
+            {
+                title: "Старший",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Никогда не поздно для силовых тренировок. Эта тренировка подойдет любому новичку, а также специально разработана для тех, кому больше 65 лет.",
+                link: "https://t.me/c/2527751508/2/84"
+            },
+            {
+                title: "Работа над корпусом",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Ищете идеальное начало для своего фитнес-курса? Вы его нашли!",
+                link: "https://t.me/c/2527751508/2/85"
+            },
+            {
+                title: "Малая ударная нагрузка",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Прокачайте свою кровь и укрепите мышцы с помощью этой комфортной для суставов тренировки.",
+                link: "https://t.me/c/2527751508/2/86"
+            }
+        ];
 
         // Данные для раздела «Подвижность»
         const mobilityWorkouts = [
@@ -479,366 +477,4 @@
                 link: "https://t.me/c/2527751508/144/379"
             },
             {
-                title: "Резкие всплески",
-                meta: "16 упражнений • 07:50 мин.",
-                desc: "Резкие всплески идеально подойдут для сжигания жира, увеличения мышечной массы и улучшения аэробной способности.",
-                link: "https://t.me/c/2527751508/144/380"
-            },
-            {
-                title: "Лечебная физкультура",
-                meta: "16 упражнений • 07:50 мин.",
-                desc: "Поднимите уровень аэробной и анаэробной выносливости, повысив метаболизм и частоту сердечных сокращений за секунды. Наслаждайтесь жиросжигающим эффектом после упражнения.",
-                link: "https://t.me/c/2527751508/144/381"
-            },
-            {
-                title: "Сердце и пресс",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Идеальное сочетание тренировки для сердца и мышц пресса для повышения тонуса организма.<br><br>Теряйте жир и наращивайте мышцы.",
-                link: "https://t.me/c/2527751508/144/382"
-            },
-            {
-                title: "Профи для всего тела",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Тренировка для всего тела, которую мы все обожаем, теперь вышла на новый уровень благодаря свежему взгляду.",
-                link: "https://t.me/c/2527751508/144/383"
-            },
-            {
-                title: "Выбор тренера",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Разработанная нашим тренером всеобъемлющая тренировка, со всеми преимуществами тренировки для всего тела.",
-                link: "https://t.me/c/2527751508/144/384"
-            },
-            {
-                title: "Пластика",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Основа упражнений для контроля веса тела.<br><br>Развивайте силу, физическую форму и гибкость, баланс, подвижность и координацию движений.",
-                link: "https://t.me/c/2527751508/144/385"
-            },
-            {
-                title: "Силовая тренировка сердца",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Включает элемент движений на основе навыков. Результаты становятся лучше, а веселье больше.",
-                link: "https://t.me/c/2527751508/144/386"
-            },
-            {
-                title: "Динамическая",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Многомерная тренировка, предназначенная для улучшения различных аспектов ваших способностей.",
-                link: "https://t.me/c/2527751508/144/387"
-            },
-            {
-                title: "Форсаж",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Больше силы и улучшенная подвижность благодаря этой функциональной и динамичной тренировке.",
-                link: "https://t.me/c/2527751508/144/388"
-            },
-            {
-                title: "ИТВИ и отдых",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Быстрый и эффективный результат от сочетания упражнений ИТВИ и упражнений на подвижность решение 50/50.",
-                link: "https://t.me/c/2527751508/144/389"
-            },
-            {
-                title: "Вместе сильнее",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Эта силовая и кардио-тренировка на основе ВИТ отлично подходит для выполнения в одиночку или с надежным партнером. Виртуальные «дай пять» во всех отношениях.",
-                link: "https://t.me/c/2527751508/144/390"
-            },
-            {
-                title: "Активное восстановление",
-                meta: "6 упражнений • 06:50 мин.",
-                desc: "Легкая тренировка для успокоения воспаленных мышц и восстановления после тяжелых тренировок.",
-                link: "https://t.me/c/2527751508/144/391"
-            }
-        ];
-                const specialWorkouts = [
-            {
-                title: "Офисное кресло",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Вы и так уже в кресле, так используйте его для этой тренировки!",
-                link: "https://t.me/c/2527751508/160/393"
-            },
-            {
-                title: "Утреннее пробуждение",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Эта тренировка пробуждает тело ото сна, и вы будете готовы бросить вызов всему миру.",
-                link: "https://t.me/c/2527751508/160/394"
-            },
-            {
-                title: "Офис",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Сделайте перерыв и очистите сознание. Эта тренировка стимулирует кровообращение и может выполняться в офисе.",
-                link: "https://t.me/c/2527751508/160/395"
-            },
-            {
-                title: "После бега",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Дополните бег каким-либо силовым упражнением с растягиванием во второй половине.",
-                link: "https://t.me/c/2527751508/160/396"
-            }
-        ];
-        
-        const beachWorkouts = [
-            {
-                title: "Пляжное тело",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Пройдите эту серию упражнений, чтобы выйти на рельеф и подготовиться к пляжу.",
-                link: "https://t.me/c/2527751508/113/119"
-            },
-            {
-                title: "Бикини",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Придайте рельеф области живота и ногам с помощью движений для накачанного тела с хорошим тонусом.",
-                link: "https://t.me/c/2527751508/113/120"
-            },
-            {
-                title: "Подъем ягодиц",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Сосредоточьтесь на самых больших мышцах и поднимайте ягодицы этими «горячими» движениями.",
-                link: "https://t.me/c/2527751508/113/121"
-            },
-            {
-                title: "Круглые ягодицы",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Приведите свои ягодицы в форму, задействовав их мышцы со всех сторон.",
-                link: "https://t.me/c/2527751508/113/122"
-            },
-            {
-                title: "Ноги и корпус",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Укрепите и придайте форму каждой мышце корпуса и ниже. Отлично подходит для улучшения способностей, или просто для лучшего внешнего вида.",
-                link: "https://t.me/c/2527751508/113/149"
-            },
-            {
-                title: "Плечи и мышцы пресса",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Хорошая осанка и отлично сложенная верхняя часть корпуса - чего ещё можно требовать от тренировки?",
-                link: "https://t.me/c/2527751508/113/150"
-            },
-            {
-                title: "Каменный корпус",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "",
-                link: "https://t.me/c/2527751508/113/152"
-            },
-            {
-                title: "Ягодицы и корпус",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Упругие ягодицы и корпус улучшат вашу осанку, вы разгрузите нижнюю часть спины, уменьшите боли в бедрах и коленях, и улучшите спортивные способности.",
-                link: "https://t.me/c/2527751508/113/153"
-            },
-            {
-                title: "Рельефер мышц",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Всё внимание тонусу и рельефу мышц. Штурмуйте все группы мышц, чтобы получить именно тот рельеф, которого вы заслуживаете.",
-                link: "https://t.me/c/2527751508/113/154"
-            },
-            {
-                title: "Изнурение для мышц",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Упражнения для сердца, которые поднимут частоту сердцебиений, помогут сжечь калории и увеличить выносливость.",
-                link: "https://t.me/c/2527751508/113/155"
-            },
-            {
-                title: "В лучшей форме",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Идеальное сочетание упражнений, которые сделают вас сильными, гибкими и подтянутыми.",
-                link: "https://t.me/c/2527751508/113/156"
-            },
-            {
-                title: "Фитнес-фигура",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Этот комплекс упражнений станет отличным началом вашей идеальной фигуры.",
-                link: "https://t.me/c/2527751508/113/212"
-            }
-        ];
-                                const challengeWorkouts = [
-            {
-                title: "Режим ракеты",
-                meta: "6 упражнений • 07:40 мин.",
-              desc: `Хотите проверить свои силы? Повторите как можно больше упражнений за одну минуту.Готовы? Поехали!`,
-
-                link: "https://t.me/c/2527751508/142/398"
-            }
-        ];
-
-        
-        
-        
-        
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const user = tg.initDataUnsafe?.user;
-            const currentUsername = user?.username ? user.username.toLowerCase() : '';
-
-            // Проверка на разработчика
-            if (currentUsername === DEV_USERNAME.toLowerCase()) {
-                unlockAll('Режим разработчика (@zhenya_zavezen)');
-                return;
-            }
-
-            // Проверка обычной подписки через CloudStorage
-            tg.CloudStorage.getItem('subscription_expires', (err, expireDateStr) => {
-                const now = new Date().getTime();
-
-                if (!err && expireDateStr && now < Number(expireDateStr)) {
-                    unlockAll('PREMIUM доступ активен');
-                } else {
-                    document.getElementById('buyBtn').style.display = 'block';
-                    document.getElementById('subtitle').innerHTML = 'Тренировки для трансформации тела';
-                }
-            });
-        });
-
-        // Отрисовка списка тренировок в подразделе
-        function renderWorkoutsList() {
-            const container = document.getElementById('workouts-list');
-            container.innerHTML = '';
-
-                let targetList = [];
-    if (currentCategoryKey === 'start') {
-        targetList = startWorkouts;
-    } else if (currentCategoryKey === 'mobility') {
-        targetList = mobilityWorkouts;
-    } else if (currentCategoryKey === 'weight_loss') {
-        targetList = weightLossWorkouts;
-    } else if (currentCategoryKey === 'stay_in_shape') {
-        targetList = stayInShapeWorkouts;
-    }        else if (currentCategoryKey === 'special') {
-            targetList = specialWorkouts;
-    
-    } else if (currentCategoryKey === 'beach') {
-            targetList = beachWorkouts;
-        } else if (currentCategoryKey === 'challenge') {
-            targetList = challengeWorkouts;
-    }
-            
-
-        
-
-            targetList.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'workout-card';
-                card.onclick = () => handleWorkoutClick(item.link);
-
-                card.innerHTML = `
-                    <div class="workout-header">
-                        <span class="workout-name">${item.title}</span>
-                        <span class="lock-icon">${isSubscribed ? '▶️' : '🔒'}</span>
-                    </div>
-                    <div class="workout-meta">${item.meta}</div>
-                    <div class="workout-desc">${item.desc}</div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // Переключение экранов
-        function openCategory(categoryName) {
-    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-    currentCategoryKey = categoryName;
-
-    const titleEl = document.getElementById('sub-title');
-    const subtitleEl = document.getElementById('sub-subtitle');
-
-    if (categoryName === 'start') {
-        titleEl.innerHTML = '⚡ Для начала';
-        subtitleEl.innerHTML = 'Выберите тренировку для старта';
-    } else if (categoryName === 'mobility') {
-        titleEl.innerHTML = '🧘 Подвижность';
-        subtitleEl.innerHTML = 'Динамические упражнения для растяжки';
-    } else if (categoryName === 'weight_loss') {
-        titleEl.innerHTML = '🔥 Сброс веса';
-        subtitleEl.innerHTML = 'Эффективные тренировки для сжигания калорий';
-    } else if (categoryName === 'stay_in_shape') {
-        titleEl.innerHTML = '⭐️ Быть в форме';
-        subtitleEl.innerHTML = 'Комплексы упражнений для поддержания формы';
-    } else if (categoryName === 'special') {
-    titleEl.innerHTML = '🎯 Специальные';
-    subtitleEl.innerHTML = 'Специальные комплексы упражнений';
-    } else if (categoryName === 'beach') {
-        titleEl.innerHTML = '🏖️ К пляжу готов';
-        subtitleEl.innerHTML = 'Серия тренировок для рельефа и пляжной формы';
-    
-    } else if (categoryName === 'challenge') {
-        titleEl.innerHTML = '🚀 Примите вызов';
-        subtitleEl.innerHTML = 'Испытания для проверки вашей силы и выносливости';
-        
-    }       
-            
-
-    renderWorkoutsList();
-
-    document.getElementById('main-screen').classList.add('hidden');
-    document.getElementById('sub-screen').classList.remove('hidden');
-        }
-        
-                
-            
-
-        function goBackToMain() {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            document.getElementById('sub-screen').classList.add('hidden');
-            document.getElementById('main-screen').classList.remove('hidden');
-        }
-
-        // Клик по конкретной тренировке
-        function handleWorkoutClick(url) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-            if (isSubscribed) {
-                tg.openTelegramLink(url);
-            } else {
-                openSubscription();
-            }
-        }
-
-        function openSubscription() {
-            const user = tg.initDataUnsafe?.user;
-            const currentUsername = user?.username ? user.username.toLowerCase() : '';
-
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-            if (currentUsername === DEV_USERNAME.toLowerCase()) {
-                tg.showAlert('Режим разработчика активен. Доступ бесплатный!');
-                return;
-            }
-
-            tg.openInvoice(INVOICE_LINK, (status) => {
-                if (status === 'paid') {
-                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    
-                    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-                    const expiresAt = new Date().getTime() + thirtyDaysMs;
-
-                    tg.CloudStorage.setItem('subscription_expires', String(expiresAt), (err, saved) => {
-                        if (saved) {
-                            unlockAll('PREMIUM доступ активирован на 30 дней');
-                            tg.showAlert('🎉 Оплата прошла успешно! Подписка оформлена на 1 месяц.');
-                        }
-                    });
-                } else if (status === 'failed') {
-                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                    tg.showAlert('Не удалось провести платеж. Попробуйте еще раз.');
-                }
-            });
-        }
-
-        function unlockAll(statusText) {
-            isSubscribed = true;
-            document.querySelectorAll('.main-lock').forEach(icon => icon.textContent = '▶️');
-            
-            const buyBtn = document.getElementById('buyBtn');
-            if (buyBtn) buyBtn.style.display = 'none';
-            
-            const subtitle = document.getElementById('subtitle');
-            if (subtitle) {
-                subtitle.innerHTML = 'Статус: <b style="color: #32d74b;">' + statusText + '</b>';
-            }
-            if (currentCategoryKey) {
-                renderWorkoutsList();
-            }
-        }
-    </script>
-</body>
-</html>
+                title
