@@ -715,7 +715,7 @@
 
         
 
-            if (currentCategoryKey === 'start' || currentCategoryKey === 'weight_loss') {
+            if (currentCategoryKey === 'start' || currentCategoryKey === 'weight_loss' || currentCategoryKey === 'mobility') {
                 const levelTitle = document.createElement('div');
                 levelTitle.className = 'level-title';
                 levelTitle.textContent = 'Новичок';
@@ -777,7 +777,7 @@
         subtitleEl.innerHTML = 'Начните свое фитнес-путешествие с подборкой тренировок для всего тела, чтобы повысить общий уровень физподготовки.';
     } else if (categoryName === 'mobility') {
         titleEl.innerHTML = '🧘 Подвижность';
-        subtitleEl.innerHTML = 'Динамические упражнения для растяжки';
+        subtitleEl.innerHTML = 'Засиделись? Благодаря этим тренировкам ваши мышцы будут здоровыми и гибкими – готовыми к любым действиям!';
     } else if (categoryName === 'weight_loss') {
         titleEl.innerHTML = '🔥 Сброс веса';
         subtitleEl.innerHTML = 'Эти тренировки укрепят ваше сердце и помогут сжечь жир. Приготовьтесь попотеть и получить видимые результаты.';
