@@ -169,10 +169,10 @@
 
     <!-- ГЛАВНЫЙ ЭКРАН -->
     <div id="main-screen">
-        <h1>💪 Seven</h1>
+        <h1><span style="filter: grayscale(100%);">💪</span> Seven</h1>
         <div class="subtitle" id="subtitle">Проверка подписки...</div>
 
-        <button class="buy-banner" id="buyBtn" onclick="openSubscription()" style="display: none;">
+        <button class="buy-banner" id="buyBtn" onclick="openSubscription()" style="display: none; filter: grayscale(100%);">
             Разблокировать на 1 месяц ⭐️
         </button>
 
@@ -225,7 +225,7 @@
     <!-- ЭКРАН ПОДРАЗДЕЛОВ -->
     <div id="sub-screen" class="hidden">
         <button class="back-btn" onclick="goBackToMain()">← Назад к категориям</button>
-        <h1 id="sub-title">⚡ Заголовок</h1>
+        <h1 id="sub-title" style="filter: grayscale(100%);">⚡ Заголовок</h1>
         <div class="subtitle" id="sub-subtitle">Описание раздела</div>
 
         <div id="workouts-list">
