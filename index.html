@@ -584,10 +584,16 @@
         
         const beachWorkouts = [
             {
-                title: "Пляжное тело",
+                title: "Круглые ягодицы",
                 meta: "12 упражнений • 07:50 мин.",
-                desc: "Пройдите эту серию упражнений, чтобы выйти на рельеф и подготовиться к пляжу.",
-                link: "https://t.me/c/2527751508/113/119"
+                desc: "Приведите свои ягодицы в форму, задействовав их мышцы со всех сторон.",
+                link: "https://t.me/c/2527751508/113/122"
+            },
+            {
+                title: "В лучшей форме",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Идеальное сочетание упражнений, которые сделают вас сильными, гибкими и подтянутыми.",
+                link: "https://t.me/c/2527751508/113/156"
             },
             {
                 title: "Бикини",
@@ -600,12 +606,6 @@
                 meta: "12 упражнений • 07:50 мин.",
                 desc: "Сосредоточьтесь на самых больших мышцах и поднимайте ягодицы этими «горячими» движениями.",
                 link: "https://t.me/c/2527751508/113/121"
-            },
-            {
-                title: "Круглые ягодицы",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Приведите свои ягодицы в форму, задействовав их мышцы со всех сторон.",
-                link: "https://t.me/c/2527751508/113/122"
             },
             {
                 title: "Ноги и корпус",
@@ -644,16 +644,16 @@
                 link: "https://t.me/c/2527751508/113/155"
             },
             {
-                title: "В лучшей форме",
-                meta: "12 упражнений • 07:50 мин.",
-                desc: "Идеальное сочетание упражнений, которые сделают вас сильными, гибкими и подтянутыми.",
-                link: "https://t.me/c/2527751508/113/156"
-            },
-            {
                 title: "Фитнес-фигура",
                 meta: "12 упражнений • 07:50 мин.",
                 desc: "Этот комплекс упражнений станет отличным началом вашей идеальной фигуры.",
                 link: "https://t.me/c/2527751508/113/212"
+            },
+            {
+                title: "Пляжное тело",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Пройдите эту серию упражнений, чтобы выйти на рельеф и подготовиться к пляжу.",
+                link: "https://t.me/c/2527751508/113/119"
             }
         ];
                                 const challengeWorkouts = [
@@ -715,7 +715,7 @@
 
         
 
-            if (currentCategoryKey === 'start' || currentCategoryKey === 'weight_loss' || currentCategoryKey === 'mobility' || currentCategoryKey === 'stay_in_shape' || currentCategoryKey === 'special') {
+            if (currentCategoryKey === 'start' || currentCategoryKey === 'weight_loss' || currentCategoryKey === 'mobility' || currentCategoryKey === 'stay_in_shape' || currentCategoryKey === 'special' || currentCategoryKey === 'beach') {
                 const levelTitle = document.createElement('div');
                 levelTitle.className = 'level-title';
                 levelTitle.textContent = 'Новичок';
@@ -765,6 +765,18 @@
                     midTitle.textContent = 'Средний';
                     container.appendChild(midTitle);
                 }
+                if (currentCategoryKey === 'beach' && index === 2) {
+                    const midTitle = document.createElement('div');
+                    midTitle.className = 'level-title';
+                    midTitle.textContent = 'Средний';
+                    container.appendChild(midTitle);
+                }
+                if (currentCategoryKey === 'beach' && index === 11) {
+                    const confidentTitle = document.createElement('div');
+                    confidentTitle.className = 'level-title';
+                    confidentTitle.textContent = 'Уверенный';
+                    container.appendChild(confidentTitle);
+                }
 
                 const card = document.createElement('div');
                 card.className = 'workout-card';
@@ -807,7 +819,7 @@
     subtitleEl.innerHTML = 'Тренировки на любой случай: идеальное утреннее пробуждение, подготовка к пробежке, или прямо в офисе!';
     } else if (categoryName === 'beach') {
         titleEl.innerHTML = '🏖️ К пляжу готов';
-        subtitleEl.innerHTML = 'Серия тренировок для рельефа и пляжной формы';
+        subtitleEl.innerHTML = 'Приведите свое тело в тонус и в форму, прежде чем отправиться в отпуск. Алоха, пляжник!';
     
     } else if (categoryName === 'challenge') {
         titleEl.innerHTML = '🚀 Примите вызов';
