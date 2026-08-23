@@ -729,6 +729,12 @@
                     midTitle.textContent = 'Средний';
                     container.appendChild(midTitle);
                 }
+                if (currentCategoryKey === 'start' && index === 14) {
+                    const confidentTitle = document.createElement('div');
+                    confidentTitle.className = 'level-title';
+                    confidentTitle.textContent = 'Уверенный';
+                    container.appendChild(confidentTitle);
+                }
 
                 const card = document.createElement('div');
                 card.className = 'workout-card';
