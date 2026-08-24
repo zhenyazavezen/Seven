@@ -856,7 +856,26 @@
             if (isSubscribed) {
                 const parts = url.split('/').filter(Boolean);
                 const workoutKey = parts.slice(-2).join('_');
-                tg.sendData(JSON.stringify({ workout: workoutKey }));
+
+                fetch('https://Zhenya.pythonanywhere.com/api/request-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        initData: tg.initData,
+                        workout: workoutKey
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok) {
+                        tg.showAlert('Видео отправлено вам в чат с ботом 💪');
+                    } else {
+                        tg.showAlert(data.message || 'Не удалось отправить видео. Попробуйте ещё раз.');
+                    }
+                })
+                .catch(() => {
+                    tg.showAlert('Ошибка сети. Проверьте подключение и попробуйте снова.');
+                });
             } else {
                 openSubscription();
             }
