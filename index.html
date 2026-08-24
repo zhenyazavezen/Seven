@@ -850,36 +850,36 @@
         }
 
         // Клик по конкретной тренировке
-        function handleWorkoutClick(url) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+function handleWorkoutClick(url) {
+    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
-            if (isSubscribed) {
-                const parts = url.split('/').filter(Boolean);
-                const workoutKey = parts.slice(-2).join('_');
+    if (isSubscribed) {
+        const parts = url.split('/').filter(Boolean);
+        const workoutKey = parts.slice(-2).join('_');
 
-                fetch('https://Zhenya.pythonanywhere.com/api/request-video', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        initData: tg.initData,
-                        workout: workoutKey
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.ok) {
-                        tg.showAlert('Видео отправлено вам в чат с ботом 💪');
-                    } else {
-                        tg.showAlert(data.message || 'Не удалось отправить видео. Попробуйте ещё раз.');
-                    }
-                })
-                .catch(() => {
-                    tg.showAlert('Ошибка сети. Проверьте подключение и попробуйте снова.');
-                });
+        fetch('https://zhenya.pythonanywhere.com/request_video', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                initData: tg.initData,
+                workout_key: workoutKey
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                tg.showAlert(data.message);
             } else {
-                openSubscription();
+                tg.showAlert(data.message || 'Не удалось отправить видео.');
             }
-        }
+        })
+        .catch(e => {
+            tg.showAlert('Ошибка сети: ' + e.message);
+        });
+    } else {
+        openSubscription();
+    }
+}
 
         function openSubscription() {
             const user = tg.initDataUnsafe?.user;
