@@ -854,7 +854,9 @@
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
             if (isSubscribed) {
-                tg.openTelegramLink(url);
+                const parts = url.split('/').filter(Boolean);
+                const workoutKey = parts.slice(-2).join('_');
+                tg.sendData(JSON.stringify({ workout: workoutKey }));
             } else {
                 openSubscription();
             }
