@@ -245,6 +245,7 @@
         const DEV_USERNAME = 'zhenya_zavezen';
         let isSubscribed = false;
         let currentCategoryKey = '';
+        let isRequestingVideo = false; // защита от повторных кликов во время запроса
 
         // Данные для раздела «Для начала»
         const startWorkouts = [
@@ -854,6 +855,9 @@ function handleWorkoutClick(url) {
     if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
     if (isSubscribed) {
+        if (isRequestingVideo) return; // уже идёт запрос — игнорируем повторный клик
+        isRequestingVideo = true;
+
         const parts = url.split('/').filter(Boolean);
         const workoutKey = parts.slice(-2).join('_');
 
@@ -868,13 +872,22 @@ function handleWorkoutClick(url) {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                tg.showAlert(data.message);
+                // Бесшовный UX: видео уже отправлено ботом в чат —
+                // сразу закрываем Mini App, чтобы пользователь оказался
+                // прямо в чате с видео, а не смотрел на замерший интерфейс.
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                tg.close();
             } else {
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
                 tg.showAlert(data.message || 'Не удалось отправить видео.');
             }
         })
         .catch(e => {
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
             tg.showAlert('Ошибка сети: ' + e.message);
+        })
+        .finally(() => {
+            isRequestingVideo = false;
         });
     } else {
         openSubscription();
