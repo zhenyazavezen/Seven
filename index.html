@@ -21,7 +21,7 @@
             background-attachment: fixed;
             color: var(--text-color);
             margin: 0;
-            padding: 16px;
+            padding: 0 16px 16px 16px;
             box-sizing: border-box;
             user-select: none;
             min-height: 100vh;
@@ -248,22 +248,34 @@
             filter: grayscale(100%);
             opacity: 0.85;
         }
-        .search-wrap {
+        #topBar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 500;
-            background: var(--card-bg);
-            padding: 10px 16px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+            background: radial-gradient(circle at 50% 0%, #a3a3a3 0%, #8a8a8a 45%, #6e6e6e 100%);
+            padding: 16px 16px 12px 16px;
             box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
         }
 
-        /* Отступ сверху под зафиксированную строку поиска, чтобы контент
-           не прятался под ней. Высота = padding(10+10) + инпут(~44px). */
-        #main-screen {
-            padding-top: 64px;
+        #topBar h1 {
+            margin-top: 0;
+        }
+
+        /* Отступ сверху под зафиксированную шапку — выставляется в px
+           через JS (syncTopBarHeight), т.к. высота шапки меняется
+           (кнопка покупки ⇄ блок статистики). */
+        #main-content {
+            padding-top: 16px;
+        }
+
+        .search-wrap {
+            position: relative;
+            z-index: 500;
+            padding: 0;
+            margin-top: 4px;
         }
 
         .search-icon {
@@ -325,8 +337,8 @@
         </div>
     </div>
 
-    <!-- ГЛАВНЫЙ ЭКРАН -->
-    <div id="main-screen">
+    <!-- ШАПКА + ПОИСК: единый зафиксированный блок сверху экрана -->
+    <div id="topBar">
         <h1><span style="filter: grayscale(100%);">💪</span> Seven</h1>
         <div class="subtitle" id="subtitle">Проверка подписки...</div>
 
@@ -345,11 +357,6 @@
             </div>
         </div>
 
-        <div id="favoritesBlock" class="hidden">
-            <div class="section-title">★ Избранное</div>
-            <div id="favoritesList"></div>
-        </div>
-
         <div class="search-wrap">
             <span class="search-icon">🔍</span>
             <input
@@ -360,6 +367,16 @@
                 oninput="handleSearchInput(this.value)"
             />
         </div>
+    </div>
+
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <div id="main-screen">
+        <div id="main-content">
+        <div id="favoritesBlock" class="hidden">
+            <div class="section-title">★ Избранное</div>
+            <div id="favoritesList"></div>
+        </div>
+
         <div id="searchResults" class="search-results hidden"></div>
         <div id="categoriesBlock">
             <div class="section-title">Категории тренировок</div>
@@ -407,10 +424,11 @@
             <span class="lock-icon main-lock">🔒</span>
         </div>
         </div>
+        </div>
     </div>
 
     <!-- ЭКРАН ПОДРАЗДЕЛОВ -->
-    <div id="sub-screen" class="hidden">
+    <div id="sub-screen" class="hidden" style="padding-top: 16px;">
         <button class="back-btn" onclick="goBackToMain()">← Назад к категориям</button>
         <h1 id="sub-title" style="filter: grayscale(100%);">⚡ Заголовок</h1>
         <div class="subtitle" id="sub-subtitle">Описание раздела</div>
@@ -423,6 +441,19 @@
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+
+        // Подгоняет отступ контента под РЕАЛЬНУЮ высоту зафиксированной
+        // шапки (#topBar) — она меняется в зависимости от того, что
+        // сейчас показано: кнопка "Разблокировать" или блок статистики.
+        // Вызывается при любом изменении содержимого шапки.
+        function syncTopBarHeight() {
+            const topBar = document.getElementById('topBar');
+            const mainContent = document.getElementById('main-content');
+            if (topBar && mainContent) {
+                mainContent.style.paddingTop = topBar.offsetHeight + 'px';
+            }
+        }
+        window.addEventListener('resize', syncTopBarHeight);
 
         const INVOICE_LINK = 'https://t.me/$eM-_apukiUtDGgAAjhEa2eMnaYQ';
         const DEV_USERNAME = 'zhenya_zavezen';
@@ -893,16 +924,19 @@
                     window.__awaitingPaymentConfirmation = false;
                     document.getElementById('buyBtn').style.display = 'block';
                     document.getElementById('subtitle').innerHTML = 'Тренировки для трансформации тела';
+                    syncTopBarHeight();
                 }
             })
             .catch(() => {
                 // Сеть недоступна — не блокируем интерфейс, просто предлагаем оплату
                 document.getElementById('buyBtn').style.display = 'block';
                 document.getElementById('subtitle').innerHTML = 'Тренировки для трансформации тела';
+                syncTopBarHeight();
             });
         }
 
         document.addEventListener("DOMContentLoaded", () => {
+            syncTopBarHeight();
             checkSubscriptionStatus();
         });
 
@@ -1118,6 +1152,7 @@
     renderWorkoutsList();
 
     document.getElementById('main-screen').classList.add('hidden');
+    document.getElementById('topBar').classList.add('hidden');
     document.getElementById('sub-screen').classList.remove('hidden');
         }
         
@@ -1128,6 +1163,8 @@
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             document.getElementById('sub-screen').classList.add('hidden');
             document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('topBar').classList.remove('hidden');
+            syncTopBarHeight();
         }
 
         // Клик по конкретной тренировке
@@ -1220,6 +1257,7 @@ function handleWorkoutClick(url) {
             if (subtitle) {
                 subtitle.innerHTML = 'Статус: <span class="status-active">' + statusText + '</span>';
             }
+            syncTopBarHeight();
             if (currentCategoryKey) {
                 renderWorkoutsList();
             }
@@ -1240,6 +1278,7 @@ function handleWorkoutClick(url) {
                     document.getElementById('statsStreak').textContent = data.streak_days;
                     document.getElementById('statsTotal').textContent = data.total_workouts;
                     document.getElementById('statsBlock').classList.remove('hidden');
+                    syncTopBarHeight();
                 }
             })
             .catch(() => { /* статистика не критична — просто не показываем блок */ });
