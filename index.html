@@ -249,13 +249,21 @@
             opacity: 0.85;
         }
         .search-wrap {
-            position: sticky;
+            position: fixed;
             top: 0;
-            z-index: 50;
+            left: 0;
+            right: 0;
+            z-index: 500;
             background: var(--card-bg);
-            margin: 0 -16px 16px -16px;
             padding: 10px 16px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+            box-sizing: border-box;
+        }
+
+        /* Отступ сверху под зафиксированную строку поиска, чтобы контент
+           не прятался под ней. Высота = padding(10+10) + инпут(~44px). */
+        #main-screen {
+            padding-top: 64px;
         }
 
         .search-icon {
