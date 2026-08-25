@@ -690,6 +690,16 @@
         // "подписка активна", пока сервер отвечал "подписки нет" — именно
         // это и вызывало ситуацию "купил, но видео не приходит".
         function checkSubscriptionStatus(attempt = 1) {
+            // Мгновенная разблокировка для разработчика прямо на клиенте,
+            // без похода на сервер — доступ есть всегда, даже если бэкенд
+            // временно недоступен или отвечает с задержкой.
+            const user = tg.initDataUnsafe?.user;
+            const currentUsername = user?.username ? user.username.toLowerCase() : '';
+            if (currentUsername === DEV_USERNAME.toLowerCase()) {
+                unlockAll(`Режим разработчика (@${DEV_USERNAME})`);
+                return;
+            }
+
             fetch(`${BACKEND_URL}/check_subscription`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -697,7 +707,7 @@
             })
             .then(res => res.json())
             .then(data => {
-                if (data.success && data.subscribed) {
+                if (data.subscribed) {
                     unlockAll(data.status_text || 'PREMIUM доступ активен');
                 } else if (attempt < 3 && window.__awaitingPaymentConfirmation) {
                     // Сразу после оплаты запись в БД может появиться на бэкенде
@@ -926,6 +936,7 @@ function handleWorkoutClick(url) {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
             if (currentUsername === DEV_USERNAME.toLowerCase()) {
+                unlockAll(`Режим разработчика (@${DEV_USERNAME})`);
                 tg.showAlert('Режим разработчика активен. Доступ бесплатный!');
                 return;
             }
