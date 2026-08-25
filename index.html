@@ -176,9 +176,109 @@
             border-radius: 8px;
             display: inline-block;
         }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-box {
+            background: #333333;
+            border-radius: 14px;
+            padding: 20px 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ffffff;
+            font-size: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .stats-block {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stats-item {
+            flex: 1;
+            background: linear-gradient(155deg, #7a7a7a 0%, #656565 100%);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .stats-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .stats-label {
+            font-size: 12px;
+            color: var(--hint-color);
+            margin-top: 2px;
+        }
+
+        .favorite-star {
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .search-box {
+            width: 100%;
+            box-sizing: border-box;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: var(--text-color);
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+
+        .search-box::placeholder {
+            color: var(--hint-color);
+        }
+
+        .search-results {
+            margin-bottom: 8px;
+        }
+
+        .search-hint {
+            font-size: 13px;
+            color: var(--hint-color);
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Оверлей загрузки при отправке видео -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-box">
+            <div class="loading-spinner"></div>
+            <span>Отправляем видео...</span>
+        </div>
+    </div>
 
     <!-- ГЛАВНЫЙ ЭКРАН -->
     <div id="main-screen">
@@ -189,7 +289,32 @@
             Разблокировать на 1 месяц ⭐️
         </button>
 
-        <div class="section-title">Категории тренировок</div>
+        <div id="statsBlock" class="stats-block hidden">
+            <div class="stats-item">
+                <div class="stats-value" id="statsStreak">0</div>
+                <div class="stats-label">🔥 дней подряд</div>
+            </div>
+            <div class="stats-item">
+                <div class="stats-value" id="statsTotal">0</div>
+                <div class="stats-label">✅ тренировок всего</div>
+            </div>
+        </div>
+
+        <div id="favoritesBlock" class="hidden">
+            <div class="section-title">★ Избранное</div>
+            <div id="favoritesList"></div>
+        </div>
+
+        <input
+            type="text"
+            id="searchInput"
+            class="search-box"
+            placeholder="🔍 Поиск тренировки..."
+            oninput="handleSearchInput(this.value)"
+        />
+        <div id="searchResults" class="search-results hidden"></div>
+        <div id="categoriesBlock">
+            <div class="section-title">Категории тренировок</div>
 
         <!-- Клик по первому разделу открывает подразделы -->
         <div class="card" onclick="openCategory('start')">
@@ -232,6 +357,7 @@
         <div class="card" onclick="handleWorkoutClick('https://t.me/c/2527751508/133/240')">
             <div class="card-info"><span class="card-icon">🎵</span><span class="card-title">10. Музыка</span></div>
             <span class="lock-icon main-lock">🔒</span>
+        </div>
         </div>
     </div>
 
@@ -733,6 +859,73 @@
         });
 
         // Отрисовка списка тренировок в подразделе
+        // --- ПОИСК ПО ВСЕМ ТРЕНИРОВКАМ ---
+        function getAllWorkouts() {
+            const withCategory = (list, categoryLabel) =>
+                list.map(item => ({ ...item, categoryLabel }));
+
+            return [
+                ...withCategory(startWorkouts, 'Для начала'),
+                ...withCategory(mobilityWorkouts, 'Подвижность'),
+                ...withCategory(weightLossWorkouts, 'Сброс веса'),
+                ...withCategory(stayInShapeWorkouts, 'Быть в форме'),
+                ...withCategory(specialWorkouts, 'Специальные'),
+                ...withCategory(beachWorkouts, 'К пляжу готов'),
+                ...withCategory(challengeWorkouts, 'Примите вызов'),
+            ];
+        }
+
+        let searchDebounceTimer = null;
+        function handleSearchInput(value) {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => performSearch(value), 150);
+        }
+
+        function performSearch(rawQuery) {
+            const query = rawQuery.trim().toLowerCase();
+            const resultsEl = document.getElementById('searchResults');
+            const categoriesEl = document.getElementById('categoriesBlock');
+
+            if (!query) {
+                resultsEl.classList.add('hidden');
+                resultsEl.innerHTML = '';
+                categoriesEl.classList.remove('hidden');
+                return;
+            }
+
+            categoriesEl.classList.add('hidden');
+            resultsEl.classList.remove('hidden');
+
+            const matches = getAllWorkouts().filter(item =>
+                item.title.toLowerCase().includes(query) ||
+                item.desc.toLowerCase().includes(query)
+            );
+
+            if (matches.length === 0) {
+                resultsEl.innerHTML = '<div class="search-hint">Ничего не найдено. Попробуй другой запрос.</div>';
+                return;
+            }
+
+            resultsEl.innerHTML = `<div class="search-hint">Найдено: ${matches.length}</div>`;
+            matches.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'workout-card';
+                card.onclick = () => handleWorkoutClick(item.link);
+                card.innerHTML = `
+                    <div class="workout-header">
+                        <span class="workout-name">${item.title}</span>
+                        <span>
+                            <span class="favorite-star" onclick="toggleFavorite('${item.link}', event)">${isFavorite(item.link) ? '★' : '☆'}</span>
+                            <span class="lock-icon">${isSubscribed ? '▶️' : '🔒'}</span>
+                        </span>
+                    </div>
+                    <div class="workout-meta">${item.categoryLabel} · ${item.meta}</div>
+                    <div class="workout-desc">${item.desc}</div>
+                `;
+                resultsEl.appendChild(card);
+            });
+        }
+
         function renderWorkoutsList() {
             const container = document.getElementById('workouts-list');
             container.innerHTML = '';
@@ -828,7 +1021,10 @@
                 card.innerHTML = `
                     <div class="workout-header">
                         <span class="workout-name">${item.title}</span>
-                        <span class="lock-icon">${isSubscribed ? '▶️' : '🔒'}</span>
+                        <span>
+                            <span class="favorite-star" onclick="toggleFavorite('${item.link}', event)">${isFavorite(item.link) ? '★' : '☆'}</span>
+                            <span class="lock-icon">${isSubscribed ? '▶️' : '🔒'}</span>
+                        </span>
                     </div>
                     <div class="workout-meta">${item.meta}</div>
                     <div class="workout-desc">${item.desc}</div>
@@ -893,6 +1089,7 @@ function handleWorkoutClick(url) {
     if (isSubscribed) {
         if (isRequestingVideo) return; // уже идёт запрос — игнорируем повторный клик
         isRequestingVideo = true;
+        document.getElementById('loadingOverlay').classList.remove('hidden');
 
         const parts = url.split('/').filter(Boolean);
         const workoutKey = parts.slice(-2).join('_');
@@ -918,11 +1115,13 @@ function handleWorkoutClick(url) {
                 tg.openTelegramLink(`https://t.me/${BOT_USERNAME}`);
                 tg.close();
             } else {
+                document.getElementById('loadingOverlay').classList.add('hidden');
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
                 tg.showAlert(data.message || 'Не удалось отправить видео.');
             }
         })
         .catch(e => {
+            document.getElementById('loadingOverlay').classList.add('hidden');
             if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
             tg.showAlert('Ошибка сети: ' + e.message);
         })
@@ -976,6 +1175,92 @@ function handleWorkoutClick(url) {
             if (currentCategoryKey) {
                 renderWorkoutsList();
             }
+            loadUserStats();
+            renderFavorites();
+        }
+
+        // --- ПРОГРЕСС И СТРИК ---
+        function loadUserStats() {
+            fetch(`${BACKEND_URL}/user_stats`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initData: tg.initData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('statsStreak').textContent = data.streak_days;
+                    document.getElementById('statsTotal').textContent = data.total_workouts;
+                    document.getElementById('statsBlock').classList.remove('hidden');
+                }
+            })
+            .catch(() => { /* статистика не критична — просто не показываем блок */ });
+        }
+
+        // --- ИЗБРАННОЕ (хранится локально на устройстве) ---
+        const FAVORITES_KEY = 'seven_favorites';
+
+        function getFavorites() {
+            try {
+                return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function isFavorite(link) {
+            return getFavorites().includes(link);
+        }
+
+        function toggleFavorite(link, event) {
+            if (event) event.stopPropagation(); // не открывать тренировку при клике на звезду
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+            let favs = getFavorites();
+            if (favs.includes(link)) {
+                favs = favs.filter(f => f !== link);
+            } else {
+                favs.push(link);
+            }
+            localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+
+            if (currentCategoryKey) renderWorkoutsList();
+            renderFavorites();
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput && searchInput.value.trim()) performSearch(searchInput.value);
+        }
+
+        function renderFavorites() {
+            const favs = getFavorites();
+            const block = document.getElementById('favoritesBlock');
+            const list = document.getElementById('favoritesList');
+
+            if (!isSubscribed || favs.length === 0) {
+                block.classList.add('hidden');
+                return;
+            }
+
+            const favItems = getAllWorkouts().filter(item => favs.includes(item.link));
+            if (favItems.length === 0) {
+                block.classList.add('hidden');
+                return;
+            }
+
+            block.classList.remove('hidden');
+            list.innerHTML = '';
+            favItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'workout-card';
+                card.onclick = () => handleWorkoutClick(item.link);
+                card.innerHTML = `
+                    <div class="workout-header">
+                        <span class="workout-name">${item.title}</span>
+                        <span class="favorite-star" onclick="toggleFavorite('${item.link}', event)">★</span>
+                    </div>
+                    <div class="workout-meta">${item.categoryLabel} · ${item.meta}</div>
+                `;
+                list.appendChild(card);
+            });
         }
     </script>
 </body>
