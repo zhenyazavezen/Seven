@@ -167,6 +167,15 @@
             font-weight: 700;
             margin: 24px 0 14px 0;
         }
+
+        .status-active {
+            color: var(--text-color);
+            font-weight: 700;
+            background: linear-gradient(155deg, #4a4a4a 0%, #333333 100%);
+            padding: 2px 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -673,27 +682,43 @@
             }
         ];
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const user = tg.initDataUnsafe?.user;
-            const currentUsername = user?.username ? user.username.toLowerCase() : '';
+        const BACKEND_URL = 'https://zhenya.pythonanywhere.com';
 
-            // Проверка на разработчика
-            if (currentUsername === DEV_USERNAME.toLowerCase()) {
-                unlockAll('Режим разработчика (@zhenya_zavezen)');
-                return;
-            }
-
-            // Проверка обычной подписки через CloudStorage
-            tg.CloudStorage.getItem('subscription_expires', (err, expireDateStr) => {
-                const now = new Date().getTime();
-
-                if (!err && expireDateStr && now < Number(expireDateStr)) {
-                    unlockAll('PREMIUM доступ активен');
+        // Единственный источник правды о подписке — бэкенд (та же БД,
+        // что проверяется при отправке видео). CloudStorage больше НЕ
+        // используется для статуса: локальное хранилище могло говорить
+        // "подписка активна", пока сервер отвечал "подписки нет" — именно
+        // это и вызывало ситуацию "купил, но видео не приходит".
+        function checkSubscriptionStatus(attempt = 1) {
+            fetch(`${BACKEND_URL}/check_subscription`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initData: tg.initData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.subscribed) {
+                    unlockAll(data.status_text || 'PREMIUM доступ активен');
+                } else if (attempt < 3 && window.__awaitingPaymentConfirmation) {
+                    // Сразу после оплаты запись в БД может появиться на бэкенде
+                    // с небольшой задержкой (обрабатывается вебхуком бота) —
+                    // пробуем ещё пару раз с паузой, прежде чем показать "не активна".
+                    setTimeout(() => checkSubscriptionStatus(attempt + 1), 1500);
                 } else {
+                    window.__awaitingPaymentConfirmation = false;
                     document.getElementById('buyBtn').style.display = 'block';
                     document.getElementById('subtitle').innerHTML = 'Тренировки для трансформации тела';
                 }
+            })
+            .catch(() => {
+                // Сеть недоступна — не блокируем интерфейс, просто предлагаем оплату
+                document.getElementById('buyBtn').style.display = 'block';
+                document.getElementById('subtitle').innerHTML = 'Тренировки для трансформации тела';
             });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            checkSubscriptionStatus();
         });
 
         // Отрисовка списка тренировок в подразделе
@@ -908,16 +933,12 @@ function handleWorkoutClick(url) {
             tg.openInvoice(INVOICE_LINK, (status) => {
                 if (status === 'paid') {
                     if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    
-                    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-                    const expiresAt = new Date().getTime() + thirtyDaysMs;
-
-                    tg.CloudStorage.setItem('subscription_expires', String(expiresAt), (err, saved) => {
-                        if (saved) {
-                            unlockAll('PREMIUM доступ активирован на 30 дней');
-                            tg.showAlert('🎉 Оплата прошла успешно! Подписка оформлена на 1 месяц.');
-                        }
-                    });
+                    tg.showAlert('🎉 Оплата прошла успешно! Активируем подписку...');
+                    // Реальную запись в БД делает бэкенд (обработчик оплаты бота).
+                    // Здесь просто перепроверяем статус у сервера, а не считаем
+                    // дату истечения на клиенте — так интерфейс не разойдётся с реальностью.
+                    window.__awaitingPaymentConfirmation = true;
+                    checkSubscriptionStatus();
                 } else if (status === 'failed') {
                     if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
                     tg.showAlert('Не удалось провести платеж. Попробуйте еще раз.');
@@ -934,7 +955,7 @@ function handleWorkoutClick(url) {
             
             const subtitle = document.getElementById('subtitle');
             if (subtitle) {
-                subtitle.innerHTML = 'Статус: <b style="color: #32d74b;">' + statusText + '</b>';
+                subtitle.innerHTML = 'Статус: <span class="status-active">' + statusText + '</span>';
             }
             if (currentCategoryKey) {
                 renderWorkoutsList();
