@@ -252,6 +252,7 @@
 
         const INVOICE_LINK = 'https://t.me/$eM-_apukiUtDGgAAjhEa2eMnaYQ';
         const DEV_USERNAME = 'zhenya_zavezen';
+        const BOT_USERNAME = 'zhenya_zavezen_bot'; // юзернейм бота — для переключения на чат перед закрытием
         let isSubscribed = false;
         let currentCategoryKey = '';
         let isRequestingVideo = false; // защита от повторных кликов во время запроса
@@ -907,10 +908,14 @@ function handleWorkoutClick(url) {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Бесшовный UX: видео уже отправлено ботом в чат —
-                // сразу закрываем Mini App, чтобы пользователь оказался
-                // прямо в чате с видео, а не смотрел на замерший интерфейс.
+                // Бесшовный UX: видео уже отправлено ботом в чат. Сначала
+                // переключаем экран Telegram именно на чат с ботом (важно
+                // для случая, когда Mini App открыт не изнутри чата, а с
+                // профиля бота через "Открыть приложение" — иначе tg.close()
+                // просто вернёт на профиль, а не покажет доставленное видео),
+                // и только потом закрываем оверлей Mini App.
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                tg.openTelegramLink(`https://t.me/${BOT_USERNAME}`);
                 tg.close();
             } else {
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
