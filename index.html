@@ -39,6 +39,8 @@
         }
 
         .buy-banner {
+            position: relative;
+            overflow: hidden;
             background: linear-gradient(155deg, #3d3d3d 0%, #262626 100%);
             color: var(--button-text);
             border: none;
@@ -51,6 +53,38 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             transition: transform 0.1s ease;
+            animation: buyBannerFloat 3.2s ease-in-out infinite;
+        }
+
+        /* Едва заметный переливающийся блик, проходящий по кнопке — привлекает
+           взгляд, но не отвлекает и не мешает читать текст на кнопке. */
+        .buy-banner::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -60%;
+            width: 45%;
+            height: 100%;
+            background: linear-gradient(
+                100deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.16) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-20deg);
+            animation: buyBannerShimmer 3.2s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes buyBannerShimmer {
+            0%   { left: -60%; }
+            55%  { left: 130%; }
+            100% { left: 130%; }
+        }
+
+        @keyframes buyBannerFloat {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-2px); }
         }
 
         .buy-banner:active {
