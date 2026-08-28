@@ -244,6 +244,58 @@
             margin-top: 2px;
         }
 
+        .plan-btn {
+            width: 100%;
+            background: linear-gradient(155deg, #7a7a7a 0%, #656565 100%);
+            color: var(--button-text);
+            border: none;
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .plan-btn:active { transform: scale(0.98); }
+
+        .goal-option {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .goal-option.selected {
+            border-color: #2ea6ff;
+            background: linear-gradient(155deg, #2ea6ff 0%, #1f6fd6 100%);
+        }
+        .goal-option-title { font-weight: 700; font-size: 15px; }
+
+        .days-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .day-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .day-circle.selected {
+            background: linear-gradient(155deg, #2ea6ff 0%, #1f6fd6 100%);
+        }
+        .toggle-switch.on .toggle-switch-knob { left: 23px; }
+
+
         .favorite-star {
             font-size: 20px;
             cursor: pointer;
@@ -363,6 +415,10 @@
             </div>
         </div>
 
+        <button class="plan-btn" id="planEntryBtn" onclick="openPlanScreen()" style="display:none;">
+            📅 Настроить план тренировок
+        </button>
+
         <div class="search-wrap">
             <span class="search-icon">🔍</span>
             <input
@@ -442,6 +498,27 @@
         <div id="workouts-list">
             <!-- Сюда динамически подгружаются тренировки -->
         </div>
+    </div>
+
+    <!-- ЭКРАН НАСТРОЙКИ ПЛАНА -->
+    <div id="plan-screen" class="hidden" style="padding-top: 16px;">
+        <button class="back-btn" onclick="closePlanScreen()">← Назад</button>
+        <h1 style="filter: grayscale(100%);">📅 Настройка плана</h1>
+        <div class="subtitle">Выбери цель, уровень и дни — сохрани свой план тренировок.</div>
+
+        <div class="section-title" style="margin-top: 20px;">Цель</div>
+        <div id="goalOptions"></div>
+
+        <div id="levelBlock" class="hidden">
+            <div class="section-title" style="margin-top: 20px;">Уровень (необязательно)</div>
+            <div id="levelOptions" style="margin-bottom: 10px;"></div>
+        </div>
+
+        <div class="section-title" style="margin-top: 20px;">Расписание</div>
+        <div class="days-row" id="daysRow"></div>
+
+        <button class="buy-banner" style="filter:none;" onclick="savePlan()">Сохранить план</button>
+        <div id="planSaveStatus" class="stats-label" style="text-align:center; margin-top:10px;"></div>
     </div>
 
     <script>
@@ -1173,6 +1250,139 @@
             syncTopBarHeight();
         }
 
+        // --- МАСТЕР ПЛАНА ---
+        // Цель = существующие категории тренировок (те же ключи, что у
+        // openCategory). Уровень сложности показываем ТОЛЬКО для целей, где
+        // он реально размечен и делит список тренировок в openCategory
+        // (см. LEVELED_GOALS ниже) — иначе кнопка ничего бы не фильтровала
+        // и вводила бы в заблуждение. "Подвижность" и "Примите вызов" не
+        // включены — там всего по одной тренировке, делить не на что.
+        const GOAL_OPTIONS = [
+            { key: 'start', icon: '⚡', title: 'Для начала' },
+            { key: 'mobility', icon: '🧘', title: 'Подвижность' },
+            { key: 'weight_loss', icon: '🔥', title: 'Сброс веса' },
+            { key: 'stay_in_shape', icon: '⭐️', title: 'Быть в форме' },
+            { key: 'special', icon: '🎯', title: 'Специальные' },
+            { key: 'beach', icon: '🏖️', title: 'К пляжу готов' },
+            { key: 'challenge', icon: '🚀', title: 'Примите вызов' },
+        ];
+        const LEVELED_GOALS = ['start', 'weight_loss', 'stay_in_shape', 'special', 'beach'];
+        const LEVEL_OPTIONS = ['Новичок', 'Средний', 'Уверенный'];
+        const DAY_LABELS = ['П', 'В', 'С', 'Ч', 'П', 'С', 'В']; // Пн=0 ... Вс=6
+
+        let planState = { goal_key: null, level: null, days: [] };
+
+        function renderPlanScreen() {
+            const goalsEl = document.getElementById('goalOptions');
+            goalsEl.innerHTML = GOAL_OPTIONS.map(g => `
+                <div class="goal-option ${planState.goal_key === g.key ? 'selected' : ''}" onclick="selectGoal('${g.key}')">
+                    <span class="goal-option-title">${g.icon} ${g.title}</span>
+                </div>
+            `).join('');
+
+            const levelBlock = document.getElementById('levelBlock');
+            const levelsEl = document.getElementById('levelOptions');
+            if (planState.goal_key && LEVELED_GOALS.includes(planState.goal_key)) {
+                levelBlock.classList.remove('hidden');
+                levelsEl.innerHTML = LEVEL_OPTIONS.map(lvl => `
+                    <div class="goal-option ${planState.level === lvl ? 'selected' : ''}" onclick="selectLevel('${lvl}')" style="display:inline-block; width:auto; padding:10px 16px; margin-right:8px;">
+                        <span class="goal-option-title" style="font-size:13px;">${lvl}</span>
+                    </div>
+                `).join('');
+            } else {
+                levelBlock.classList.add('hidden');
+            }
+
+            const daysEl = document.getElementById('daysRow');
+            daysEl.innerHTML = DAY_LABELS.map((label, i) => `
+                <div class="day-circle ${planState.days.includes(i) ? 'selected' : ''}" onclick="toggleDay(${i})">${label}</div>
+            `).join('');
+        }
+
+        function selectGoal(key) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            planState.goal_key = key;
+            if (!LEVELED_GOALS.includes(key)) planState.level = null;
+            renderPlanScreen();
+        }
+
+        function selectLevel(lvl) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            planState.level = (planState.level === lvl) ? null : lvl;
+            renderPlanScreen();
+        }
+
+        function toggleDay(i) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            const idx = planState.days.indexOf(i);
+            if (idx === -1) planState.days.push(i); else planState.days.splice(idx, 1);
+            renderPlanScreen();
+        }
+
+        function openPlanScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('main-screen').classList.add('hidden');
+            document.getElementById('topBar').classList.add('hidden');
+            document.getElementById('plan-screen').classList.remove('hidden');
+            document.getElementById('planSaveStatus').textContent = '';
+
+            fetch(`${BACKEND_URL}/get_plan`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initData: tg.initData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.plan) {
+                    planState = { ...data.plan };
+                }
+                renderPlanScreen();
+            })
+            .catch(() => renderPlanScreen());
+        }
+
+        function closePlanScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('plan-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('topBar').classList.remove('hidden');
+            syncTopBarHeight();
+        }
+
+        function savePlan() {
+            const statusEl = document.getElementById('planSaveStatus');
+            if (!planState.goal_key) {
+                statusEl.textContent = 'Выбери цель, чтобы сохранить план.';
+                return;
+            }
+            if (planState.days.length === 0) {
+                statusEl.textContent = 'Отметь хотя бы один день недели.';
+                return;
+            }
+            statusEl.textContent = 'Сохраняем...';
+
+            fetch(`${BACKEND_URL}/save_plan`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    initData: tg.initData,
+                    goal_key: planState.goal_key,
+                    level: planState.level,
+                    days: planState.days
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    statusEl.textContent = 'План сохранён ✅';
+                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    statusEl.textContent = data.message || 'Не удалось сохранить, попробуй ещё раз.';
+                }
+            })
+            .catch(() => { statusEl.textContent = 'Нет связи с сервером, попробуй ещё раз.'; });
+        }
+
         // Клик по конкретной тренировке
 function handleWorkoutClick(url) {
     if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
@@ -1284,6 +1494,7 @@ function handleWorkoutClick(url) {
                     document.getElementById('statsStreak').textContent = data.streak_days;
                     document.getElementById('statsTotal').textContent = data.total_workouts;
                     document.getElementById('statsBlock').classList.remove('hidden');
+                    document.getElementById('planEntryBtn').style.display = 'block';
                     syncTopBarHeight();
                 }
             })
