@@ -110,6 +110,11 @@
             filter: grayscale(100%);
         }
 
+        .card-arrow {
+            font-size: 22px;
+            opacity: 0.6;
+        }
+
         /* Стили для экрана подразделов тренировок */
         .workout-card {
             background: linear-gradient(155deg, #7a7a7a 0%, #656565 100%);
@@ -385,6 +390,73 @@
             color: var(--hint-color);
             margin-bottom: 10px;
         }
+
+        /* --- Стили для "О приложении" (Поддержка / Соцсети) --- */
+        .about-menu-item {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .support-contact-block {
+            background: linear-gradient(155deg, #7a7a7a 0%, #656565 100%);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .support-contact-text {
+            margin-bottom: 14px;
+            line-height: 1.4;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .faq-question {
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        .faq-answer {
+            padding: 0 15px 15px 15px;
+            color: var(--hint-color);
+            font-size: 14px;
+            line-height: 1.5;
+            display: none;
+        }
+        .faq-item.open .faq-answer { display: block; }
+        .faq-toggle-icon {
+            font-size: 18px;
+            transition: transform 0.15s ease;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        .faq-item.open .faq-toggle-icon { transform: rotate(45deg); }
+
+        .social-link-item {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -487,6 +559,10 @@
             <div class="card-info"><span class="card-icon">🎵</span><span class="card-title">10. Музыка</span></div>
             <span class="lock-icon main-lock">🔒</span>
         </div>
+        <div class="card" onclick="openAboutScreen()">
+            <div class="card-info"><span class="card-icon">⚙️</span><span class="card-title">О приложении</span></div>
+            <span class="card-arrow">›</span>
+        </div>
         </div>
         </div>
     </div>
@@ -521,6 +597,84 @@
 
         <button class="buy-banner" style="filter:none;" onclick="savePlan()">Сохранить план</button>
         <div id="planSaveStatus" class="stats-label" style="text-align:center; margin-top:10px; filter: grayscale(100%);"></div>
+    </div>
+
+    <!-- ЭКРАН "О ПРИЛОЖЕНИИ" — меню -->
+    <div id="about-screen" class="hidden" style="padding-top: 16px;">
+        <button class="back-btn" onclick="closeAboutScreen()">← Назад</button>
+        <h1 style="filter: grayscale(100%);"><span class="mono-emoji">⚙️</span> О приложении</h1>
+
+        <div class="about-menu-item" onclick="openSupportScreen()">
+            <span><span class="mono-emoji">💬</span> Поддержка</span>
+            <span class="card-arrow">›</span>
+        </div>
+        <div class="about-menu-item" onclick="openSocialScreen()">
+            <span><span class="mono-emoji">📲</span> Соцсети</span>
+            <span class="card-arrow">›</span>
+        </div>
+    </div>
+
+    <!-- ЭКРАН "ПОДДЕРЖКА" -->
+    <div id="support-screen" class="hidden" style="padding-top: 16px;">
+        <button class="back-btn" onclick="closeSupportScreen()">← Назад</button>
+        <h1 style="filter: grayscale(100%);"><span class="mono-emoji">💬</span> Поддержка</h1>
+
+        <div class="support-contact-block">
+            <div class="support-contact-text">Есть вопрос, отзыв или предложение? Мы на связи и готовы помочь.</div>
+            <button class="buy-banner" style="filter:none; margin-bottom:0;" onclick="openSupportChat()">Отправить запрос</button>
+        </div>
+
+        <div class="section-title" style="margin-bottom: 10px;">Частые вопросы</div>
+
+        <div class="faq-item" id="faq-0" onclick="toggleFaq(0)">
+            <div class="faq-question">
+                <span>В чём заключается концепция числа семь?</span>
+                <span class="faq-toggle-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Программа Seven строится на принципе высокоинтенсивных тренировок (HIIT) — короткие 7-минутные занятия дают значительную часть пользы от полноценной долгой тренировки за минимум времени.
+                Такой формат чередует интенсивные упражнения с короткими паузами, что помогает эффективнее сжигать калории и поддерживать высокий пульс, чем равномерное кардио вроде монотонного бега.
+                Короткие интервалы отдыха не только экономят время, но и хорошо тренируют выносливость сердечно-сосудистой системы.
+            </div>
+        </div>
+
+        <div class="faq-item" id="faq-1" onclick="toggleFaq(1)">
+            <div class="faq-question">
+                <span>Сколько калорий сжигается во время тренировки?</span>
+                <span class="faq-toggle-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Точное количество зависит от веса, пола, возраста и интенсивности выполнения — цифры в приложении усреднённые, ориентируйтесь на них как на примерный ориентир, а не точный расчёт.
+            </div>
+        </div>
+
+        <div class="faq-item" id="faq-2" onclick="toggleFaq(2)">
+            <div class="faq-question">
+                <span>Почему нельзя добавить своё оборудование?</span>
+                <span class="faq-toggle-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Seven — это тренировки с собственным весом тела, без привязки к залу или инвентарю, чтобы заниматься можно было где угодно.
+                Если хочется усложнить упражнения — гантели или другие лёгкие отягощения прекрасно подойдут дополнительно, например для приседаний, выпадов, тяг или жимов над головой.
+                Перед работой с весом всегда стоит размяться и увеличивать нагрузку постепенно.
+            </div>
+        </div>
+    </div>
+
+    <!-- ЭКРАН "СОЦСЕТИ" -->
+    <div id="social-screen" class="hidden" style="padding-top: 16px;">
+        <button class="back-btn" onclick="closeSocialScreen()">← Назад</button>
+        <h1 style="filter: grayscale(100%);"><span class="mono-emoji">📲</span> Мы в соцсетях</h1>
+
+        <div class="social-link-item" onclick="window.Telegram.WebApp.openLink('https://www.instagram.com/zhenya_zavezen?igsi=MTV1bTg3MmZkcTY4YQ==')">
+            <span class="mono-emoji">📸</span> Instagram
+        </div>
+        <div class="social-link-item" onclick="window.Telegram.WebApp.openLink('https://youtube.com/@zhenya_zavezen?si=WZZ2gU5ggzJQXFu-')">
+            <span class="mono-emoji">🎬</span> YouTube
+        </div>
+        <div class="social-link-item" onclick="window.Telegram.WebApp.openLink('https://www.tiktok.com/@zhenya_zavezen?_r=1&_t=ZS-99NXBvRiSTi')">
+            <span class="mono-emoji">🎵</span> TikTok
+        </div>
     </div>
 
     <script>
@@ -1349,6 +1503,53 @@
             document.getElementById('main-screen').classList.remove('hidden');
             document.getElementById('topBar').classList.remove('hidden');
             syncTopBarHeight();
+        }
+
+        // --- "О ПРИЛОЖЕНИИ" (Поддержка / Соцсети) ---
+        function openAboutScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('main-screen').classList.add('hidden');
+            document.getElementById('topBar').classList.add('hidden');
+            document.getElementById('about-screen').classList.remove('hidden');
+        }
+        function closeAboutScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('about-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('topBar').classList.remove('hidden');
+            syncTopBarHeight();
+        }
+
+        function openSupportScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('about-screen').classList.add('hidden');
+            document.getElementById('support-screen').classList.remove('hidden');
+        }
+        function closeSupportScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('support-screen').classList.add('hidden');
+            document.getElementById('about-screen').classList.remove('hidden');
+        }
+
+        function openSocialScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('about-screen').classList.add('hidden');
+            document.getElementById('social-screen').classList.remove('hidden');
+        }
+        function closeSocialScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('social-screen').classList.add('hidden');
+            document.getElementById('about-screen').classList.remove('hidden');
+        }
+
+        function toggleFaq(index) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById(`faq-${index}`).classList.toggle('open');
+        }
+
+        function openSupportChat() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            tg.openTelegramLink('https://t.me/zhenya_zavezen');
         }
 
         function savePlan() {
