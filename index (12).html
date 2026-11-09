@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seven — Тренировки</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #8a8a8a;
+            --text-color: #ffffff;
+            --hint-color: #e6e6e6;
+            --card-bg: #6f6f6f;
+            --button-color: #333333;
+            --button-text: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #a3a3a3 0%, #8a8a8a 45%, #6e6e6e 100%);
+            background-attachment: fixed;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0 16px 16px 16px;
+            box-sizing: border-box;
+            user-select: none;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--hint-color);
+            margin-bottom: 16px;
+        }
+
+        .buy-banner {
+            background: linear-gradient(155deg, #3d3d3d 0%, #262626 100%);
+            color: var(--button-text);
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: transform 0.1s ease;
+            animation: buyBannerFloat 3.2s ease-in-out infinite;
+        }
+
+        @keyframes buyBannerFloat {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-2px); }
+        }
+
+        .buy-banner:active {
+            transform: scale(0.98);
+        }
+
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--hint-color);
+            margin: 20px 0 10px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .card {
+            background: linear-gradient(155deg, #7a7a7a 0%, #656565 100%);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-icon {
+            font-size: 24px;
+            filter: grayscale(100%);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .lock-icon {
+            font-size: 18px;
+            opacity: 0.8;
+            filter: grayscale(100%);
+        }
+
+        .card-arrow {
+            font-size: 22px;
+            opacity: 0.6;
+        }
+
+        /* Стили для экрана подразделов тренировок */
+        .workout-card {
+            background: linear-gradient(155deg, #7a7a7a 0%, #656565 100%);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .workout-card:active {
+            transform: scale(0.98);
+        }
+
+        .workout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .workout-name {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .workout-meta {
+            font-size: 13px;
+            color: #d5d5d5;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .workout-desc {
+            font-size: 14px;
+            color: var(--hint-color);
+            line-height: 1.4;
+        }
+
+        .back-btn {
+            background: transparent;
+            color: var(--button-color);
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .level-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin: 24px 0 14px 0;
+        }
+
+        .status-active {
+            color: var(--text-color);
+            font-weight: 700;
+            background: linear-gradient(155deg, #4a4a4a 0%, #333333 100%);
+            padding: 2px 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-box {
+            background: #333333;
+            border-radius: 14px;
+            padding: 20px 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ffffff;
+            font-size: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .stats-block {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stats-item {
+            flex: 1;
+            background: linear-gradient(155deg, #7a7a7a 0%, #656565 100%);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .stats-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .stats-label {
+            font-size: 12px;
+            color: var(--hint-color);
+            margin-top: 2px;
+        }
+
+        .plan-btn {
+            width: 100%;
+            background: linear-gradient(155deg, #7a7a7a 0%, #656565 100%);
+            color: var(--button-text);
+            border: none;
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .plan-btn:active { transform: scale(0.98); }
+
+        .goal-option {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .goal-option.selected {
+            border-color: rgba(255, 255, 255, 0.35);
+            background: linear-gradient(155deg, #3d3d3d 0%, #262626 100%);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .goal-option-title { font-weight: 700; font-size: 15px; }
+
+        .days-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .day-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .day-circle.selected {
+            background: linear-gradient(155deg, #3d3d3d 0%, #262626 100%);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+
+        .favorite-star {
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        .mono-emoji {
+            filter: grayscale(100%);
+            opacity: 0.85;
+        }
+        #topBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 500;
+            background: radial-gradient(circle at 50% 0%, #a3a3a3 0%, #8a8a8a 45%, #6e6e6e 100%);
+            padding: 16px 16px 12px 16px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        #topBar h1 {
+            margin-top: 0;
+        }
+
+        /* Отступ сверху под зафиксированную шапку — выставляется в px
+           через JS (syncTopBarHeight), т.к. высота шапки меняется
+           (кнопка покупки ⇄ блок статистики). */
+        #main-content {
+            padding-top: 16px;
+        }
+
+        .search-wrap {
+            position: relative;
+            z-index: 500;
+            padding: 0;
+            margin-top: 4px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            filter: grayscale(100%);
+            opacity: 0.85;
+            pointer-events: none;
+        }
+
+        .search-box {
+            width: 100%;
+            box-sizing: border-box;
+            background: #5a5a5a;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 12px 14px 12px 38px;
+            color: var(--text-color);
+            font-size: 15px;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            caret-color: var(--text-color);
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .search-box:focus,
+        .search-box:focus-visible {
+            outline: none;
+            border-color: var(--button-color);
+            background: #656565;
+            box-shadow: none;
+        }
+
+        .search-box::placeholder {
+            color: var(--hint-color);
+        }
+
+        .search-results {
+            margin-bottom: 8px;
+        }
+
+        .search-hint {
+            font-size: 13px;
+            color: var(--hint-color);
+            margin-bottom: 10px;
+        }
+
+        /* --- Стили для "О приложении" (Поддержка / Соцсети) --- */
+        .about-menu-item {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .support-contact-block {
+            background: linear-gradient(155deg, #7a7a7a 0%, #656565 100%);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .support-contact-text {
+            margin-bottom: 14px;
+            line-height: 1.4;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .faq-question {
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        .faq-answer {
+            padding: 0 15px 15px 15px;
+            color: var(--hint-color);
+            font-size: 14px;
+            line-height: 1.5;
+            display: none;
+        }
+        .faq-item.open .faq-answer { display: block; }
+        .faq-toggle-icon {
+            font-size: 18px;
+            transition: transform 0.15s ease;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        .faq-item.open .faq-toggle-icon { transform: rotate(45deg); }
+
+        .social-link-item {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Оверлей загрузки при отправке видео -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-box">
+            <div class="loading-spinner"></div>
+            <span>Отправляем видео...</span>
+        </div>
+    </div>
+
+    <!-- ШАПКА + ПОИСК: единый зафиксированный блок сверху экрана -->
+    <div id="topBar">
+        <div class="subtitle" id="subtitle">Проверка подписки...</div>
+
+        <button class="buy-banner" id="buyBtn" onclick="openSubscription()" style="display: none; filter: grayscale(100%);">
+            Разблокировать на 1 месяц ⭐️
+        </button>
+
+        <div id="statsBlock" class="stats-block hidden">
+            <div class="stats-item">
+                <div class="stats-value" id="statsStreak">0</div>
+                <div class="stats-label"><span class="mono-emoji">🔥</span> дней подряд</div>
+            </div>
+            <div class="stats-item">
+                <div class="stats-value" id="statsTotal">0</div>
+                <div class="stats-label"><span class="mono-emoji">✅</span> тренировок всего</div>
+            </div>
+        </div>
+
+        <button class="plan-btn" id="planEntryBtn" onclick="openPlanScreen()" style="display:none;">
+            <span class="mono-emoji">📅</span> Настроить план тренировок
+        </button>
+
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input
+                type="text"
+                id="searchInput"
+                class="search-box"
+                placeholder="Поиск тренировки..."
+                oninput="handleSearchInput(this.value)"
+            />
+        </div>
+    </div>
+
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <div id="main-screen">
+        <div id="main-content">
+        <div id="favoritesBlock" class="hidden">
+            <div class="section-title">★ Избранное</div>
+            <div id="favoritesList"></div>
+        </div>
+
+        <div id="searchResults" class="search-results hidden"></div>
+        <div id="categoriesBlock">
+            <div class="section-title">Категории тренировок</div>
+
+        <!-- Клик по первому разделу открывает подразделы -->
+        <div class="card" onclick="openCategory('start')">
+            <div class="card-info"><span class="card-icon">⚡</span><span class="card-title">1. Для начала</span></div>
+            <span class="lock-icon main-lock">🔒</span>
+        </div>
+        <div class="card" onclick="openCategory('mobility')">
+            <div class="card-info"><span class="card-icon">🧘</span><span class="card-title">2. Подвижность</span></div>
+            <span class="lock-icon main-lock">🔒</span>
+        </div>
+        <div class="card" onclick="openCategory('weight_loss')">
+            <div class="card-info"><span class="card-icon">🔥</span><span class="card-title">3. Сброс веса</span></div>
+            <span class="lock-icon main-lock">🔒</span>
+        </div>
+        <div class="card" onclick="openCategory('stay_in_shape')">
+            <div class="card-info"><span class="card-icon">⭐️</span><span class="card-title">4. Быть в форме</span></div>
+            <span class="lock-icon main-lock">🔒</span>
+        </div>
+        <div class="card" onclick="openCategory('special') ">
+            <div class="card-info"><span class="card-icon">🎯</span><span class="card-title">5. Специальные</span></div>
+            <span class="lock-icon main-lock">🔒</span>
+        </div>
+        <div class="card" onclick="openCategory('beach') ">
+            <div class="card-info"><span class="card-icon">🏖️</span><span class="card-title">6. К пляжу готов</span></div>
+            <span class="lock-icon main-lock">🔒</span>
+        </div>
+        <div class="card" onclick="openCategory('challenge')">
+            
+            <div class="card-info"><span class="card-icon">🚀</span><span class="card-title">7. Примите вызов</span></div>
+            <span class="lock-icon main-lock">🔒</span>
+        </div>
+        <div class="card" onclick="handleWorkoutClick('https://t.me/c/2527751508/138/400')">
+            <div class="card-info"><span class="card-icon">🥗</span><span class="card-title">8. Питание</span></div>
+            <span class="lock-icon main-lock">🔒</span>
+        </div>
+        <div class="card" onclick="handleWorkoutClick('https://t.me/c/2527751508/137/198')">
+            <div class="card-info"><span class="card-icon">⏱️</span><span class="card-title">9. Интервальное голодание</span></div>
+            <span class="lock-icon main-lock">🔒</span>
+        </div>
+        <div class="card" onclick="handleWorkoutClick('https://t.me/c/2527751508/133/240')">
+            <div class="card-info"><span class="card-icon">🎵</span><span class="card-title">10. Музыка</span></div>
+            <span class="lock-icon main-lock">🔒</span>
+        </div>
+        <div class="card" onclick="openAboutScreen()">
+            <div class="card-info"><span class="card-icon">⚙️</span><span class="card-title">О приложении</span></div>
+            <span class="card-arrow">›</span>
+        </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- ЭКРАН ПОДРАЗДЕЛОВ -->
+    <div id="sub-screen" class="hidden" style="padding-top: 16px;">
+        <button class="back-btn" onclick="goBackToMain()">← Назад к категориям</button>
+        <h1 id="sub-title" style="filter: grayscale(100%);">⚡ Заголовок</h1>
+        <div class="subtitle" id="sub-subtitle">Описание раздела</div>
+
+        <div id="workouts-list">
+            <!-- Сюда динамически подгружаются тренировки -->
+        </div>
+    </div>
+
+    <!-- ЭКРАН НАСТРОЙКИ ПЛАНА -->
+    <div id="plan-screen" class="hidden" style="padding-top: 16px;">
+        <button class="back-btn" onclick="closePlanScreen()">← Назад</button>
+        <h1 style="filter: grayscale(100%);">📅 Настройка плана</h1>
+        <div class="subtitle">Выбери цель, уровень и дни — сохрани свой план тренировок.</div>
+
+        <div class="section-title" style="margin-top: 20px;">Цель</div>
+        <div id="goalOptions"></div>
+
+        <div id="levelBlock" class="hidden">
+            <div class="section-title" style="margin-top: 20px;">Уровень</div>
+            <div id="levelOptions" style="margin-bottom: 10px;"></div>
+        </div>
+
+        <div class="section-title" style="margin-top: 20px;">Расписание</div>
+        <div class="days-row" id="daysRow"></div>
+
+        <button class="buy-banner" style="filter:none;" onclick="savePlan()">Сохранить план</button>
+        <div id="planSaveStatus" class="stats-label" style="text-align:center; margin-top:10px; filter: grayscale(100%);"></div>
+    </div>
+
+    <!-- ЭКРАН "О ПРИЛОЖЕНИИ" — меню -->
+    <div id="about-screen" class="hidden" style="padding-top: 16px;">
+        <button class="back-btn" onclick="closeAboutScreen()">← Назад</button>
+        <h1 style="filter: grayscale(100%);"><span class="mono-emoji">⚙️</span> О приложении</h1>
+
+        <div class="about-menu-item" onclick="openSupportScreen()">
+            <span><span class="mono-emoji">💬</span> Поддержка</span>
+            <span class="card-arrow">›</span>
+        </div>
+        <div class="about-menu-item" onclick="openSocialScreen()">
+            <span><span class="mono-emoji">📲</span> Соцсети</span>
+            <span class="card-arrow">›</span>
+        </div>
+    </div>
+
+    <!-- ЭКРАН "ПОДДЕРЖКА" -->
+    <div id="support-screen" class="hidden" style="padding-top: 16px;">
+        <button class="back-btn" onclick="closeSupportScreen()">← Назад</button>
+        <h1 style="filter: grayscale(100%);"><span class="mono-emoji">💬</span> Поддержка</h1>
+
+        <div class="support-contact-block">
+            <div class="support-contact-text">Есть вопрос, отзыв или предложение? Мы на связи и готовы помочь.</div>
+            <button class="buy-banner" style="filter:none; margin-bottom:0;" onclick="openSupportChat()">Отправить запрос</button>
+        </div>
+
+        <div class="section-title" style="margin-bottom: 10px;">Частые вопросы</div>
+
+        <div class="faq-item" id="faq-0" onclick="toggleFaq(0)">
+            <div class="faq-question">
+                <span>В чём заключается концепция числа семь?</span>
+                <span class="faq-toggle-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Программа Seven строится на принципе высокоинтенсивных тренировок (HIIT) — короткие 7-минутные занятия дают значительную часть пользы от полноценной долгой тренировки за минимум времени.
+                Такой формат чередует интенсивные упражнения с короткими паузами, что помогает эффективнее сжигать калории и поддерживать высокий пульс, чем равномерное кардио вроде монотонного бега.
+                Короткие интервалы отдыха не только экономят время, но и хорошо тренируют выносливость сердечно-сосудистой системы.
+            </div>
+        </div>
+
+        <div class="faq-item" id="faq-1" onclick="toggleFaq(1)">
+            <div class="faq-question">
+                <span>Сколько калорий сжигается во время тренировки?</span>
+                <span class="faq-toggle-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Точное количество зависит от веса, пола, возраста и интенсивности выполнения — цифры в приложении усреднённые, ориентируйтесь на них как на примерный ориентир, а не точный расчёт.
+            </div>
+        </div>
+
+        <div class="faq-item" id="faq-2" onclick="toggleFaq(2)">
+            <div class="faq-question">
+                <span>Почему нельзя добавить своё оборудование?</span>
+                <span class="faq-toggle-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Seven — это тренировки с собственным весом тела, без привязки к залу или инвентарю, чтобы заниматься можно было где угодно.
+                Если хочется усложнить упражнения — гантели или другие лёгкие отягощения прекрасно подойдут дополнительно, например для приседаний, выпадов, тяг или жимов над головой.
+                Перед работой с весом всегда стоит размяться и увеличивать нагрузку постепенно.
+            </div>
+        </div>
+    </div>
+
+    <!-- ЭКРАН "СОЦСЕТИ" -->
+    <div id="social-screen" class="hidden" style="padding-top: 16px;">
+        <button class="back-btn" onclick="closeSocialScreen()">← Назад</button>
+        <h1 style="filter: grayscale(100%);"><span class="mono-emoji">📲</span> Мы в соцсетях</h1>
+
+        <div class="social-link-item" onclick="window.Telegram.WebApp.openLink('https://www.instagram.com/zhenya_zavezen?igsi=MTV1bTg3MmZkcTY4YQ==')">
+            <span class="mono-emoji">📸</span> Instagram
+        </div>
+        <div class="social-link-item" onclick="window.Telegram.WebApp.openLink('https://youtube.com/@zhenya_zavezen?si=WZZ2gU5ggzJQXFu-')">
+            <span class="mono-emoji">🎬</span> YouTube
+        </div>
+        <div class="social-link-item" onclick="window.Telegram.WebApp.openLink('https://www.tiktok.com/@zhenya_zavezen?_r=1&_t=ZS-99NXBvRiSTi')">
+            <span class="mono-emoji">🎵</span> TikTok
+        </div>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Подгоняет отступ контента под РЕАЛЬНУЮ высоту зафиксированной
+        // шапки (#topBar) — она меняется в зависимости от того, что
+        // сейчас показано: кнопка "Разблокировать" или блок статистики.
+        // Вызывается при любом изменении содержимого шапки.
+        function syncTopBarHeight() {
+            const topBar = document.getElementById('topBar');
+            const mainContent = document.getElementById('main-content');
+            if (topBar && mainContent) {
+                mainContent.style.paddingTop = topBar.offsetHeight + 'px';
+            }
+        }
+        window.addEventListener('resize', syncTopBarHeight);
+
+        const INVOICE_LINK = 'https://t.me/$eM-_apukiUtDGgAAjhEa2eMnaYQ';
+
+        // ВИТРИНА: сервера у проекта больше нет. Запросы к бэкенду сразу «не удаются» —
+        // приложение показывает тот же экран, что и без сети (кнопка «Разблокировать»).
+        // Окно оплаты Telegram открывается настоящее; платёж не проходит, потому что
+        // бот не отвечает на проверку перед оплатой (pre_checkout_query).
+        const SHOWCASE_MODE = true;
+        (function () {
+            const realFetch = window.fetch.bind(window);
+            window.fetch = function (url, opts) {
+                if (SHOWCASE_MODE && String(url).indexOf('pythonanywhere.com') !== -1) {
+                    return Promise.reject(new Error('showcase: backend disabled'));
+                }
+                return realFetch(url, opts);
+            };
+        })();
+        const DEV_USERNAME = 'zhenya_zavezen';
+        const BOT_USERNAME = 'zhenya_zavezen_bot'; // юзернейм бота — для переключения на чат перед закрытием
+        let isSubscribed = false;
+        let currentCategoryKey = '';
+        let isRequestingVideo = false; // защита от повторных кликов во время запроса
+
+        // Данные для раздела «Для начала»
+        const startWorkouts = [
+            {
+                title: "Нижняя часть",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Цель этой тренировки ягодицы и ноги с идеальным балансом силы и кардио.",
+                link: "https://t.me/c/2527751508/2/65"
+            },
+            {
+                title: "Гибкость",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Увеличьте амплитуду движений и уменьшите ограничения мышц с помощью этого упражнения на растяжение всего корпуса.",
+                link: "https://t.me/c/2527751508/2/70"
+            },
+            {
+                title: "Легкая форма",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Приведите себя в форму, выполняя эту простую тренировку, которая подойдет любому.",
+                link: "https://t.me/c/2527751508/2/74"
+            },
+            {
+                title: "На четвереньках",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Этот набор упражнений на полу уменьшает риск травм, а также помогает поддерживать себя в должной форме и формировать сильное тело.",
+                link: "https://t.me/c/2527751508/2/81"
+            },
+            {
+                title: "Разогрев",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Отличный способ начать день. Разогрейте мышцы и суставы для лучших результатов.",
+                link: "https://t.me/c/2527751508/2/82"
+            },
+            {
+                title: "Я здесь первый раз",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Впервые в Seven? Эти простые упражнения выработают новую привычку на всю жизнь!",
+                link: "https://t.me/c/2527751508/2/83"
+            },
+            {
+                title: "Старший",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Никогда не поздно для силовых тренировок. Эта тренировка подойдет любому новичку, а также специально разработана для тех, кому больше 65 лет.",
+                link: "https://t.me/c/2527751508/2/84"
+            },
+            {
+                title: "Работа над корпусом",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Ищете идеальное начало для своего фитнес-курса? Вы его нашли!",
+                link: "https://t.me/c/2527751508/2/85"
+            },
+            {
+                title: "Все тело",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Научно доказано, что так обеспечиваются самые лучшие результаты в кратчайшие сроки. Этот классический ВИТ имеет все необходимое для достижения ваших целей.",
+                link: "https://t.me/c/2527751508/2/57"
+            },
+            {
+                title: "Верхняя часть",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Руки, плечи, грудь и верхняя часть спины всего здесь есть отличные тренировки.",
+                link: "https://t.me/c/2527751508/2/58"
+            },
+            {
+                title: "Спина и передняя часть",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Если давать каждой половине тела отдохнуть по очереди, вы сможете быстрее восстановиться между упражнениями. И выложиться ещё больше.",
+                link: "https://t.me/c/2527751508/2/72"
+            },
+            {
+                title: "Верх и низ",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Если давать каждой половине тела отдохнуть по очереди, вы сможете быстрее восстановиться между упражнениями. И выложиться ещё больше.",
+                link: "https://t.me/c/2527751508/2/73"
+            },
+            {
+                title: "Функциональная (новичок)",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Доведите каждую часть своего тела до предела возможностей при помощи этих разнообразных функциональных движений.",
+                link: "https://t.me/c/2527751508/2/75"
+            },
+            {
+                title: "Малая ударная нагрузка",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Прокачайте свою кровь и укрепите мышцы с помощью этой комфортной для суставов тренировки.",
+                link: "https://t.me/c/2527751508/2/86"
+            },
+            {
+                title: "Учебка",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Сосредоточьтесь на основных группах мышц. Попробуйте высокоинтенсивную тренировку, которая заставит вас попотеть.",
+                link: "https://t.me/c/2527751508/2/71"
+            }
+        ];
+
+        // Данные для раздела «Подвижность»
+        const mobilityWorkouts = [
+            {
+                title: "Активное растягивание",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Подготовьте своё тело к ежедневным вызовам с этими динамическими упражнениями для растяжки.",
+                link: "https://t.me/c/2527751508/215/374"
+            }
+        ];
+
+        // Данные для раздела «Сброс веса»
+        const weightLossWorkouts = [
+            {
+                title: "Худые ноги",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Накачайте ноги с помощью этих комплексных упражнений для всех мышц ног.",
+                link: "https://t.me/c/2527751508/87/94"
+            },
+            {
+                title: "Легкая",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Легкие и умеренные упражнения для начинающих или для восстановления после травмы.",
+                link: "https://t.me/c/2527751508/87/95"
+            },
+            {
+                title: "Домашнее задание",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "На домашнее задание уйдет всего 7 минут! Эта тройня высвободит все полезные гормоны для вашего тела и разума.",
+                link: "https://t.me/c/2527751508/87/111"
+            },
+            {
+                title: "Сердце и легкие",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Нужна высокоинтенсивная тренировка сердца? Вот 7 минут абсолютных кардиоупражнений.",
+                link: "https://t.me/c/2527751508/87/112"
+            },
+            {
+                title: "Легкая прокачка",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "С легкостью укрепляйте свое тело и разум, чтобы увеличить общую силу.",
+                link: "https://t.me/c/2527751508/87/116"
+            },
+            {
+                title: "Жиросжигание",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Благодаря тренировке для сжигания жира вы сможете уничтожить калории, не истощая силы слишком быстро. Попробуйте её и посмотрите, сколько кругов вам под силу!",
+                link: "https://t.me/c/2527751508/87/91"
+            },
+            {
+                title: "Разогрев живота",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Ощутите жжение от тренировки с постоянным напряжением. Эта программа предназначена для области живота.",
+                link: "https://t.me/c/2527751508/87/92"
+            },
+            {
+                title: "Сжигание калорий",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "От этой тренировки для сердечно-сосудистой системы вы сожжете ещё больше калорий. Почувствуйте, как сгорают калории, пока вы придаете рельеф своим мышцам.",
+                link: "https://t.me/c/2527751508/87/93"
+            },
+            {
+                title: "Повышение тонуса",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Сформируйте накачанные сухие мышцы без поднятия тяжестей. Работайте над усталостью мышц, чтобы повысить тонус и укрепить их.",
+                link: "https://t.me/c/2527751508/87/96"
+            },
+            {
+                title: "Выносливость",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Тренируйте свою выносливость. Нагрузка не уйдет, пока не закончится тренировка.",
+                link: "https://t.me/c/2527751508/87/97"
+            },
+            {
+                title: "Аэробика",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Увеличьте частоту сердцебиений и циркуляцию крови по всему телу, чтобы натренировать сердце и легкие, и повысить выносливость.",
+                link: "https://t.me/c/2527751508/87/98"
+            },
+            {
+                title: "Из стороны в сторону",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Скручивайтесь, сгибайтесь и взмахивайте. Движения в поперечном направлении приведут вас в форму и подтянут сначала одну сторону, а затем другую.",
+                link: "https://t.me/c/2527751508/87/99"
+            },
+            {
+                title: "Кардиопрорыв",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Вы укрепите свое сердце, увеличите выносливость и перейдете на новый уровень тренировки сердца.",
+                link: "https://t.me/c/2527751508/87/102"
+            },
+            {
+                title: "Общая тренировка сердца",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Движения в разных направлениях, которые помогают улучшить ловкость, выносливость и координацию.",
+                link: "https://t.me/c/2527751508/87/103"
+            },
+            {
+                title: "Фитнес-фигура",
+                meta: "7 упражнений • 06:40 мин.",
+                desc: "Просто и эффективно. Если вам нужно привести себя в форму, с этой тренировкой вы добьетесь желаемого.",
+                link: "https://t.me/c/2527751508/87/104"
+            },
+            {
+                title: "Рельеф и тонус",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Повышайте тонус мышц и сжигайте больше калорий с этой тренировкой для всего тела.",
+                link: "https://t.me/c/2527751508/87/110"
+            },
+            {
+                title: "ВИТ в радость",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Прыгайте и поднимайте настроение с помощью этого цикла ВИТ, повышающего уровень эндорфинов!",
+                link: "https://t.me/c/2527751508/87/115"
+            },
+            {
+                title: "Экстрим для сердца",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Эта тренировка увеличит частоту сердцебиений и циркуляцию крови. Есть побочные эффекты? Усиленный метаболизм и хорошее самочувствие.",
+                link: "https://t.me/c/2527751508/87/100"
+            }
+        ];        
+
+        // Данные для раздела «Быть в форме»
+        const stayInShapeWorkouts = [
+            {
+                title: "Динамическая",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Многомерная тренировка, предназначенная для улучшения различных аспектов ваших способностей.",
+                link: "https://t.me/c/2527751508/144/387"
+            },
+            {
+                title: "ИТВИ и отдых",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Быстрый и эффективный результат от сочетания упражнений ИТВИ и упражнений на подвижность решение 50/50.",
+                link: "https://t.me/c/2527751508/144/389"
+            },
+            {
+                title: "Активное восстановление",
+                meta: "6 упражнений • 06:50 мин.",
+                desc: "Легкая тренировка для успокоения воспаленных мышц и восстановления после тяжелых тренировок.",
+                link: "https://t.me/c/2527751508/144/391"
+            },
+            {
+                title: "Сердце",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Идите ва-банк и терпите до конца, чтобы укрепить и прибавить здоровья сердцу! Улучшенная выносливость гарантирована.",
+                link: "https://t.me/c/2527751508/144/376"
+            },
+            {
+                title: "Сила",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Благодаря этой тренировке для контроля веса тела вы укрепите весь свой организм. Тренировка сердца может подождать, время качаться!",
+                link: "https://t.me/c/2527751508/144/378"
+            },
+            {
+                title: "Резкие всплески",
+                meta: "16 упражнений • 07:50 мин.",
+                desc: "Резкие всплески идеально подойдут для сжигания жира, увеличения мышечной массы и улучшения аэробной способности.",
+                link: "https://t.me/c/2527751508/144/380"
+            },
+            {
+                title: "Сердце и пресс",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Идеальное сочетание тренировки для сердца и мышц пресса для повышения тонуса организма.<br><br>Теряйте жир и наращивайте мышцы.",
+                link: "https://t.me/c/2527751508/144/382"
+            },
+            {
+                title: "Профи для всего тела",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Тренировка для всего тела, которую мы все обожаем, теперь вышла на новый уровень благодаря свежему взгляду.",
+                link: "https://t.me/c/2527751508/144/383"
+            },
+            {
+                title: "Выбор тренера",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Разработанная нашим тренером всеобъемлющая тренировка, со всеми преимуществами тренировки для всего тела.",
+                link: "https://t.me/c/2527751508/144/384"
+            },
+            {
+                title: "Силовая тренировка сердца",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Включает элемент движений на основе навыков. Результаты становятся лучше, а веселье больше.",
+                link: "https://t.me/c/2527751508/144/386"
+            },
+            {
+                title: "Форсаж",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Больше силы и улучшенная подвижность благодаря этой функциональной и динамичной тренировке.",
+                link: "https://t.me/c/2527751508/144/388"
+            },
+            {
+                title: "Вместе сильнее",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Эта силовая и кардио-тренировка на основе ВИТ отлично подходит для выполнения в одиночку или с надежным партнером. Виртуальные «дай пять» во всех отношениях.",
+                link: "https://t.me/c/2527751508/144/390"
+            },
+            {
+                title: "Взрывные",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Тренируйтесь, как атлет! Взрывные упражнения для всего тела отлично подходят для развития практической скорости и силы. Такое подойдет для любого случая.",
+                link: "https://t.me/c/2527751508/144/377"
+            },
+            {
+                title: "Атлетические",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Приемы из спортивных программ тренировок, которые откроют вам столь желанные грани физической подготовки.",
+                link: "https://t.me/c/2527751508/144/379"
+            },
+            {
+                title: "Лечебная физкультура",
+                meta: "16 упражнений • 07:50 мин.",
+                desc: "Поднимите уровень аэробной и анаэробной выносливости, повысив метаболизм и частоту сердечных сокращений за секунды. Наслаждайтесь жиросжигающим эффектом после упражнения.",
+                link: "https://t.me/c/2527751508/144/381"
+            },
+            {
+                title: "Пластика",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Основа упражнений для контроля веса тела.<br><br>Развивайте силу, физическую форму и гибкость, баланс, подвижность и координацию движений.",
+                link: "https://t.me/c/2527751508/144/385"
+            }
+        ];
+                const specialWorkouts = [
+            {
+                title: "Офис",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Сделайте перерыв и очистите сознание. Эта тренировка стимулирует кровообращение и может выполняться в офисе.",
+                link: "https://t.me/c/2527751508/160/395"
+            },
+            {
+                title: "Офисное кресло",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Вы и так уже в кресле, так используйте его для этой тренировки!",
+                link: "https://t.me/c/2527751508/160/393"
+            },
+            {
+                title: "После бега",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Дополните бег каким-либо силовым упражнением с растягиванием во второй половине.",
+                link: "https://t.me/c/2527751508/160/396"
+            },
+            {
+                title: "Утреннее пробуждение",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Эта тренировка пробуждает тело ото сна, и вы будете готовы бросить вызов всему миру.",
+                link: "https://t.me/c/2527751508/160/394"
+            }
+        ];
+        
+        const beachWorkouts = [
+            {
+                title: "Круглые ягодицы",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Приведите свои ягодицы в форму, задействовав их мышцы со всех сторон.",
+                link: "https://t.me/c/2527751508/113/122"
+            },
+            {
+                title: "В лучшей форме",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Идеальное сочетание упражнений, которые сделают вас сильными, гибкими и подтянутыми.",
+                link: "https://t.me/c/2527751508/113/156"
+            },
+            {
+                title: "Бикини",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Придайте рельеф области живота и ногам с помощью движений для накачанного тела с хорошим тонусом.",
+                link: "https://t.me/c/2527751508/113/120"
+            },
+            {
+                title: "Подъем ягодиц",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Сосредоточьтесь на самых больших мышцах и поднимайте ягодицы этими «горячими» движениями.",
+                link: "https://t.me/c/2527751508/113/121"
+            },
+            {
+                title: "Ноги и корпус",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Укрепите и придайте форму каждой мышце корпуса и ниже. Отлично подходит для улучшения способностей, или просто для лучшего внешнего вида.",
+                link: "https://t.me/c/2527751508/113/149"
+            },
+            {
+                title: "Плечи и мышцы пресса",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Хорошая осанка и отлично сложенная верхняя часть корпуса - чего ещё можно требовать от тренировки?",
+                link: "https://t.me/c/2527751508/113/150"
+            },
+            {
+                title: "Каменный корпус",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "",
+                link: "https://t.me/c/2527751508/113/152"
+            },
+            {
+                title: "Ягодицы и корпус",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Упругие ягодицы и корпус улучшат вашу осанку, вы разгрузите нижнюю часть спины, уменьшите боли в бедрах и коленях, и улучшите спортивные способности.",
+                link: "https://t.me/c/2527751508/113/153"
+            },
+            {
+                title: "Рельефер мышц",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Всё внимание тонусу и рельефу мышц. Штурмуйте все группы мышц, чтобы получить именно тот рельеф, которого вы заслуживаете.",
+                link: "https://t.me/c/2527751508/113/154"
+            },
+            {
+                title: "Изнурение для мышц",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Упражнения для сердца, которые поднимут частоту сердцебиений, помогут сжечь калории и увеличить выносливость.",
+                link: "https://t.me/c/2527751508/113/155"
+            },
+            {
+                title: "Фитнес-фигура",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Этот комплекс упражнений станет отличным началом вашей идеальной фигуры.",
+                link: "https://t.me/c/2527751508/113/212"
+            },
+            {
+                title: "Пляжное тело",
+                meta: "12 упражнений • 07:50 мин.",
+                desc: "Пройдите эту серию упражнений, чтобы выйти на рельеф и подготовиться к пляжу.",
+                link: "https://t.me/c/2527751508/113/119"
+            }
+        ];
+                                const challengeWorkouts = [
+            {
+                title: "Режим ракеты",
+                meta: "6 упражнений • 07:40 мин.",
+              desc: `Хотите проверить свои силы? Повторите как можно больше упражнений за одну минуту.Готовы? Поехали!`,
+
+                link: "https://t.me/c/2527751508/142/398"
+            }
+        ];
+
+        const BACKEND_URL = 'https://zhenya.pythonanywhere.com';
+
+        // Единственный источник правды о подписке — бэкенд (та же БД,
+        // что проверяется при отправке видео). CloudStorage больше НЕ
+        // используется для статуса: локальное хранилище могло говорить
+        // "подписка активна", пока сервер отвечал "подписки нет" — именно
+        // это и вызывало ситуацию "купил, но видео не приходит".
+        function checkSubscriptionStatus(attempt = 1) {
+            // Мгновенная разблокировка для разработчика прямо на клиенте,
+            // без похода на сервер — доступ есть всегда, даже если бэкенд
+            // временно недоступен или отвечает с задержкой.
+            const user = tg.initDataUnsafe?.user;
+            const currentUsername = user?.username ? user.username.toLowerCase() : '';
+            if (currentUsername === DEV_USERNAME.toLowerCase()) {
+                unlockAll(`Режим разработчика (@${DEV_USERNAME})`);
+                return;
+            }
+
+            fetch(`${BACKEND_URL}/check_subscription`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initData: tg.initData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.subscribed) {
+                    unlockAll(data.status_text || 'PREMIUM доступ активен');
+                } else if (attempt < 3 && window.__awaitingPaymentConfirmation) {
+                    // Сразу после оплаты запись в БД может появиться на бэкенде
+                    // с небольшой задержкой (обрабатывается вебхуком бота) —
+                    // пробуем ещё пару раз с паузой, прежде чем показать "не активна".
+                    setTimeout(() => checkSubscriptionStatus(attempt + 1), 1500);
+                } else {
+                    window.__awaitingPaymentConfirmation = false;
+                    document.getElementById('buyBtn').style.display = 'block';
+                    document.getElementById('subtitle').innerHTML = 'Тренировки для трансформации тела';
+                    syncTopBarHeight();
+                }
+            })
+            .catch(() => {
+                // Сеть недоступна — не блокируем интерфейс, просто предлагаем оплату
+                document.getElementById('buyBtn').style.display = 'block';
+                document.getElementById('subtitle').innerHTML = 'Тренировки для трансформации тела';
+                syncTopBarHeight();
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            syncTopBarHeight();
+            checkSubscriptionStatus();
+        });
+
+        // Отрисовка списка тренировок в подразделе
+        // --- ПОИСК ПО ВСЕМ ТРЕНИРОВКАМ ---
+        function getAllWorkouts() {
+            const withCategory = (list, categoryLabel) =>
+                list.map(item => ({ ...item, categoryLabel }));
+
+            return [
+                ...withCategory(startWorkouts, 'Для начала'),
+                ...withCategory(mobilityWorkouts, 'Подвижность'),
+                ...withCategory(weightLossWorkouts, 'Сброс веса'),
+                ...withCategory(stayInShapeWorkouts, 'Быть в форме'),
+                ...withCategory(specialWorkouts, 'Специальные'),
+                ...withCategory(beachWorkouts, 'К пляжу готов'),
+                ...withCategory(challengeWorkouts, 'Примите вызов'),
+            ];
+        }
+
+        let searchDebounceTimer = null;
+        function handleSearchInput(value) {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => performSearch(value), 150);
+        }
+
+        function performSearch(rawQuery) {
+            const query = rawQuery.trim().toLowerCase();
+            const resultsEl = document.getElementById('searchResults');
+            const categoriesEl = document.getElementById('categoriesBlock');
+
+            if (!query) {
+                resultsEl.classList.add('hidden');
+                resultsEl.innerHTML = '';
+                categoriesEl.classList.remove('hidden');
+                return;
+            }
+
+            categoriesEl.classList.add('hidden');
+            resultsEl.classList.remove('hidden');
+
+            const matches = getAllWorkouts().filter(item =>
+                item.title.toLowerCase().includes(query) ||
+                item.desc.toLowerCase().includes(query)
+            );
+
+            if (matches.length === 0) {
+                resultsEl.innerHTML = '<div class="search-hint">Ничего не найдено. Попробуй другой запрос.</div>';
+                return;
+            }
+
+            resultsEl.innerHTML = `<div class="search-hint">Найдено: ${matches.length}</div>`;
+            matches.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'workout-card';
+                card.onclick = () => handleWorkoutClick(item.link);
+                card.innerHTML = `
+                    <div class="workout-header">
+                        <span class="workout-name">${item.title}</span>
+                        <span>
+                            <span class="favorite-star" onclick="toggleFavorite('${item.link}', event)">${isFavorite(item.link) ? '★' : '☆'}</span>
+                            <span class="lock-icon">${isSubscribed ? '▶️' : '🔒'}</span>
+                        </span>
+                    </div>
+                    <div class="workout-meta">${item.categoryLabel} · ${item.meta}</div>
+                    <div class="workout-desc">${item.desc}</div>
+                `;
+                resultsEl.appendChild(card);
+            });
+        }
+
+        function renderWorkoutsList() {
+            const container = document.getElementById('workouts-list');
+            container.innerHTML = '';
+
+                let targetList = [];
+    if (currentCategoryKey === 'start') {
+        targetList = startWorkouts;
+    } else if (currentCategoryKey === 'mobility') {
+        targetList = mobilityWorkouts;
+    } else if (currentCategoryKey === 'weight_loss') {
+        targetList = weightLossWorkouts;
+    } else if (currentCategoryKey === 'stay_in_shape') {
+        targetList = stayInShapeWorkouts;
+    }        else if (currentCategoryKey === 'special') {
+            targetList = specialWorkouts;
+    
+    } else if (currentCategoryKey === 'beach') {
+            targetList = beachWorkouts;
+        } else if (currentCategoryKey === 'challenge') {
+            targetList = challengeWorkouts;
+    }
+            
+
+        
+
+            if (currentCategoryKey === 'start' || currentCategoryKey === 'weight_loss' || currentCategoryKey === 'mobility' || currentCategoryKey === 'stay_in_shape' || currentCategoryKey === 'special' || currentCategoryKey === 'beach') {
+                const levelTitle = document.createElement('div');
+                levelTitle.className = 'level-title';
+                levelTitle.textContent = 'Новичок';
+                container.appendChild(levelTitle);
+            }
+
+            targetList.forEach((item, index) => {
+                if (currentCategoryKey === 'start' && index === 8) {
+                    const midTitle = document.createElement('div');
+                    midTitle.className = 'level-title';
+                    midTitle.textContent = 'Средний';
+                    container.appendChild(midTitle);
+                }
+                if (currentCategoryKey === 'start' && index === 14) {
+                    const confidentTitle = document.createElement('div');
+                    confidentTitle.className = 'level-title';
+                    confidentTitle.textContent = 'Уверенный';
+                    container.appendChild(confidentTitle);
+                }
+                if (currentCategoryKey === 'weight_loss' && index === 5) {
+                    const midTitle = document.createElement('div');
+                    midTitle.className = 'level-title';
+                    midTitle.textContent = 'Средний';
+                    container.appendChild(midTitle);
+                }
+                if (currentCategoryKey === 'weight_loss' && index === 17) {
+                    const confidentTitle = document.createElement('div');
+                    confidentTitle.className = 'level-title';
+                    confidentTitle.textContent = 'Уверенный';
+                    container.appendChild(confidentTitle);
+                }
+                if (currentCategoryKey === 'stay_in_shape' && index === 3) {
+                    const midTitle = document.createElement('div');
+                    midTitle.className = 'level-title';
+                    midTitle.textContent = 'Средний';
+                    container.appendChild(midTitle);
+                }
+                if (currentCategoryKey === 'stay_in_shape' && index === 12) {
+                    const confidentTitle = document.createElement('div');
+                    confidentTitle.className = 'level-title';
+                    confidentTitle.textContent = 'Уверенный';
+                    container.appendChild(confidentTitle);
+                }
+                if (currentCategoryKey === 'special' && index === 2) {
+                    const midTitle = document.createElement('div');
+                    midTitle.className = 'level-title';
+                    midTitle.textContent = 'Средний';
+                    container.appendChild(midTitle);
+                }
+                if (currentCategoryKey === 'beach' && index === 2) {
+                    const midTitle = document.createElement('div');
+                    midTitle.className = 'level-title';
+                    midTitle.textContent = 'Средний';
+                    container.appendChild(midTitle);
+                }
+                if (currentCategoryKey === 'beach' && index === 11) {
+                    const confidentTitle = document.createElement('div');
+                    confidentTitle.className = 'level-title';
+                    confidentTitle.textContent = 'Уверенный';
+                    container.appendChild(confidentTitle);
+                }
+
+                const card = document.createElement('div');
+                card.className = 'workout-card';
+                card.onclick = () => handleWorkoutClick(item.link);
+
+                card.innerHTML = `
+                    <div class="workout-header">
+                        <span class="workout-name">${item.title}</span>
+                        <span>
+                            <span class="favorite-star" onclick="toggleFavorite('${item.link}', event)">${isFavorite(item.link) ? '★' : '☆'}</span>
+                            <span class="lock-icon">${isSubscribed ? '▶️' : '🔒'}</span>
+                        </span>
+                    </div>
+                    <div class="workout-meta">${item.meta}</div>
+                    <div class="workout-desc">${item.desc}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Переключение экранов
+        function openCategory(categoryName) {
+    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    currentCategoryKey = categoryName;
+
+    const titleEl = document.getElementById('sub-title');
+    const subtitleEl = document.getElementById('sub-subtitle');
+
+    if (categoryName === 'start') {
+        titleEl.innerHTML = '⚡ Для начала';
+        subtitleEl.innerHTML = 'Начните свое фитнес-путешествие с подборкой тренировок для всего тела, чтобы повысить общий уровень физподготовки.';
+    } else if (categoryName === 'mobility') {
+        titleEl.innerHTML = '🧘 Подвижность';
+        subtitleEl.innerHTML = 'Засиделись? Благодаря этим тренировкам ваши мышцы будут здоровыми и гибкими – готовыми к любым действиям!';
+    } else if (categoryName === 'weight_loss') {
+        titleEl.innerHTML = '🔥 Сброс веса';
+        subtitleEl.innerHTML = 'Эти тренировки укрепят ваше сердце и помогут сжечь жир. Приготовьтесь попотеть и получить видимые результаты.';
+    } else if (categoryName === 'stay_in_shape') {
+        titleEl.innerHTML = '⭐️ Быть в форме';
+        subtitleEl.innerHTML = 'Быстрая и эффективная тренировка для тонуса мышц и повышения выносливости.';
+    } else if (categoryName === 'special') {
+    titleEl.innerHTML = '🎯 Специальные';
+    subtitleEl.innerHTML = 'Тренировки на любой случай: идеальное утреннее пробуждение, подготовка к пробежке, или прямо в офисе!';
+    } else if (categoryName === 'beach') {
+        titleEl.innerHTML = '🏖️ К пляжу готов';
+        subtitleEl.innerHTML = 'Приведите свое тело в тонус и в форму, прежде чем отправиться в отпуск. Алоха, пляжник!';
+    
+    } else if (categoryName === 'challenge') {
+        titleEl.innerHTML = '🚀 Примите вызов';
+        subtitleEl.innerHTML = 'Испытания для проверки вашей силы и выносливости';
+        
+    }       
+            
+
+    renderWorkoutsList();
+
+    document.getElementById('main-screen').classList.add('hidden');
+    document.getElementById('topBar').classList.add('hidden');
+    document.getElementById('sub-screen').classList.remove('hidden');
+        }
+        
+                
+            
+
+        function goBackToMain() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('sub-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('topBar').classList.remove('hidden');
+            syncTopBarHeight();
+        }
+
+        // --- МАСТЕР ПЛАНА ---
+        // Цель = существующие категории тренировок (те же ключи, что у
+        // openCategory). Уровень сложности показываем ТОЛЬКО для целей, где
+        // он реально размечен и делит список тренировок в openCategory
+        // (см. LEVELED_GOALS ниже) — иначе кнопка ничего бы не фильтровала
+        // и вводила бы в заблуждение. "Подвижность" и "Примите вызов" не
+        // включены — там всего по одной тренировке, делить не на что.
+        const GOAL_OPTIONS = [
+            { key: 'start', icon: '⚡', title: 'Для начала' },
+            { key: 'mobility', icon: '🧘', title: 'Подвижность' },
+            { key: 'weight_loss', icon: '🔥', title: 'Сброс веса' },
+            { key: 'stay_in_shape', icon: '⭐️', title: 'Быть в форме' },
+            { key: 'special', icon: '🎯', title: 'Специальные' },
+            { key: 'beach', icon: '🏖️', title: 'К пляжу готов' },
+            { key: 'challenge', icon: '🚀', title: 'Примите вызов' },
+        ];
+        const LEVELED_GOALS = ['start', 'weight_loss', 'stay_in_shape', 'special', 'beach'];
+        const LEVEL_OPTIONS = ['Новичок', 'Средний', 'Уверенный'];
+        const DAY_LABELS = ['П', 'В', 'С', 'Ч', 'П', 'С', 'В']; // Пн=0 ... Вс=6
+
+        let planState = { goal_key: null, level: null, days: [] };
+
+        function renderPlanScreen() {
+            const goalsEl = document.getElementById('goalOptions');
+            goalsEl.innerHTML = GOAL_OPTIONS.map(g => `
+                <div class="goal-option ${planState.goal_key === g.key ? 'selected' : ''}" onclick="selectGoal('${g.key}')">
+                    <span class="goal-option-title"><span class="mono-emoji">${g.icon}</span> ${g.title}</span>
+                </div>
+            `).join('');
+
+            const levelBlock = document.getElementById('levelBlock');
+            const levelsEl = document.getElementById('levelOptions');
+            if (planState.goal_key && LEVELED_GOALS.includes(planState.goal_key)) {
+                levelBlock.classList.remove('hidden');
+                levelsEl.innerHTML = LEVEL_OPTIONS.map(lvl => `
+                    <div class="goal-option ${planState.level === lvl ? 'selected' : ''}" onclick="selectLevel('${lvl}')" style="display:inline-block; width:auto; padding:10px 16px; margin-right:8px;">
+                        <span class="goal-option-title" style="font-size:13px;">${lvl}</span>
+                    </div>
+                `).join('');
+            } else {
+                levelBlock.classList.add('hidden');
+            }
+
+            const daysEl = document.getElementById('daysRow');
+            daysEl.innerHTML = DAY_LABELS.map((label, i) => `
+                <div class="day-circle ${planState.days.includes(i) ? 'selected' : ''}" onclick="toggleDay(${i})">${label}</div>
+            `).join('');
+        }
+
+        function selectGoal(key) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            planState.goal_key = key;
+            if (!LEVELED_GOALS.includes(key)) planState.level = null;
+            renderPlanScreen();
+        }
+
+        function selectLevel(lvl) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            planState.level = (planState.level === lvl) ? null : lvl;
+            renderPlanScreen();
+        }
+
+        function toggleDay(i) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            const idx = planState.days.indexOf(i);
+            if (idx === -1) planState.days.push(i); else planState.days.splice(idx, 1);
+            renderPlanScreen();
+        }
+
+        function openPlanScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('main-screen').classList.add('hidden');
+            document.getElementById('topBar').classList.add('hidden');
+            document.getElementById('plan-screen').classList.remove('hidden');
+            document.getElementById('planSaveStatus').textContent = '';
+
+            fetch(`${BACKEND_URL}/get_plan`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initData: tg.initData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.plan) {
+                    planState = { ...data.plan };
+                }
+                renderPlanScreen();
+            })
+            .catch(() => renderPlanScreen());
+        }
+
+        function closePlanScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('plan-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('topBar').classList.remove('hidden');
+            syncTopBarHeight();
+        }
+
+        // --- "О ПРИЛОЖЕНИИ" (Поддержка / Соцсети) ---
+        function openAboutScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('main-screen').classList.add('hidden');
+            document.getElementById('topBar').classList.add('hidden');
+            document.getElementById('about-screen').classList.remove('hidden');
+        }
+        function closeAboutScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('about-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('topBar').classList.remove('hidden');
+            syncTopBarHeight();
+        }
+
+        function openSupportScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('about-screen').classList.add('hidden');
+            document.getElementById('support-screen').classList.remove('hidden');
+        }
+        function closeSupportScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('support-screen').classList.add('hidden');
+            document.getElementById('about-screen').classList.remove('hidden');
+        }
+
+        function openSocialScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('about-screen').classList.add('hidden');
+            document.getElementById('social-screen').classList.remove('hidden');
+        }
+        function closeSocialScreen() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('social-screen').classList.add('hidden');
+            document.getElementById('about-screen').classList.remove('hidden');
+        }
+
+        function toggleFaq(index) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById(`faq-${index}`).classList.toggle('open');
+        }
+
+        function openSupportChat() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            tg.openTelegramLink('https://t.me/zhenya_zavezen');
+        }
+
+        function savePlan() {
+            const statusEl = document.getElementById('planSaveStatus');
+            if (!planState.goal_key) {
+                statusEl.textContent = 'Выбери цель, чтобы сохранить план.';
+                return;
+            }
+            if (planState.days.length === 0) {
+                statusEl.textContent = 'Отметь хотя бы один день недели.';
+                return;
+            }
+            statusEl.textContent = 'Сохраняем...';
+
+            fetch(`${BACKEND_URL}/save_plan`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    initData: tg.initData,
+                    goal_key: planState.goal_key,
+                    level: planState.level,
+                    days: planState.days
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    statusEl.textContent = 'План сохранён ✅';
+                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    statusEl.textContent = data.message || 'Не удалось сохранить, попробуй ещё раз.';
+                }
+            })
+            .catch(() => { statusEl.textContent = 'Нет связи с сервером, попробуй ещё раз.'; });
+        }
+
+        // Клик по конкретной тренировке
+function handleWorkoutClick(url) {
+    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+    if (isSubscribed) {
+        if (isRequestingVideo) return; // уже идёт запрос — игнорируем повторный клик
+        isRequestingVideo = true;
+        document.getElementById('loadingOverlay').classList.remove('hidden');
+
+        const parts = url.split('/').filter(Boolean);
+        const workoutKey = parts.slice(-2).join('_');
+
+        fetch('https://zhenya.pythonanywhere.com/request_video', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                initData: tg.initData,
+                workout_key: workoutKey
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Бесшовный UX: видео уже отправлено ботом в чат. Сначала
+                // переключаем экран Telegram именно на чат с ботом (важно
+                // для случая, когда Mini App открыт не изнутри чата, а с
+                // профиля бота через "Открыть приложение" — иначе tg.close()
+                // просто вернёт на профиль, а не покажет доставленное видео),
+                // и только потом закрываем оверлей Mini App.
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                tg.openTelegramLink(`https://t.me/${BOT_USERNAME}`);
+                tg.close();
+            } else {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                tg.showAlert(data.message || 'Не удалось отправить видео.');
+            }
+        })
+        .catch(e => {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            tg.showAlert('Ошибка сети: ' + e.message);
+        })
+        .finally(() => {
+            isRequestingVideo = false;
+        });
+    } else {
+        openSubscription();
+    }
+}
+
+        function openSubscription() {
+            const user = tg.initDataUnsafe?.user;
+            const currentUsername = user?.username ? user.username.toLowerCase() : '';
+
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+            if (currentUsername === DEV_USERNAME.toLowerCase()) {
+                unlockAll(`Режим разработчика (@${DEV_USERNAME})`);
+                tg.showAlert('Режим разработчика активен. Доступ бесплатный!');
+                return;
+            }
+
+            tg.openInvoice(INVOICE_LINK, (status) => {
+                if (status === 'paid') {
+                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    tg.showAlert('Оплата получена, но в этой версии подписка не активируется.');
+                    // Реальную запись в БД делает бэкенд (обработчик оплаты бота).
+                    // Здесь просто перепроверяем статус у сервера, а не считаем
+                    // дату истечения на клиенте — так интерфейс не разойдётся с реальностью.
+                    window.__awaitingPaymentConfirmation = true;
+                    checkSubscriptionStatus();
+                } else if (status === 'failed') {
+                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                    tg.showAlert('Не удалось провести платеж. Попробуйте еще раз.');
+                }
+            });
+        }
+
+        function unlockAll(statusText) {
+            isSubscribed = true;
+            document.querySelectorAll('.main-lock').forEach(icon => icon.textContent = '▶️');
+            
+            const buyBtn = document.getElementById('buyBtn');
+            if (buyBtn) buyBtn.style.display = 'none';
+            
+            const subtitle = document.getElementById('subtitle');
+            if (subtitle) {
+                subtitle.innerHTML = 'Статус: <span class="status-active">' + statusText + '</span>';
+            }
+            syncTopBarHeight();
+            if (currentCategoryKey) {
+                renderWorkoutsList();
+            }
+            loadUserStats();
+            renderFavorites();
+        }
+
+        // --- ПРОГРЕСС И СТРИК ---
+        function loadUserStats() {
+            fetch(`${BACKEND_URL}/user_stats`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initData: tg.initData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('statsStreak').textContent = data.streak_days;
+                    document.getElementById('statsTotal').textContent = data.total_workouts;
+                    document.getElementById('statsBlock').classList.remove('hidden');
+                    document.getElementById('planEntryBtn').style.display = 'block';
+                    syncTopBarHeight();
+                }
+            })
+            .catch(() => { /* статистика не критична — просто не показываем блок */ });
+        }
+
+        // --- ИЗБРАННОЕ (хранится локально на устройстве) ---
+        const FAVORITES_KEY = 'seven_favorites';
+
+        function getFavorites() {
+            try {
+                return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function isFavorite(link) {
+            return getFavorites().includes(link);
+        }
+
+        function toggleFavorite(link, event) {
+            if (event) event.stopPropagation(); // не открывать тренировку при клике на звезду
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+            let favs = getFavorites();
+            if (favs.includes(link)) {
+                favs = favs.filter(f => f !== link);
+            } else {
+                favs.push(link);
+            }
+            localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+
+            if (currentCategoryKey) renderWorkoutsList();
+            renderFavorites();
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput && searchInput.value.trim()) performSearch(searchInput.value);
+        }
+
+        function renderFavorites() {
+            const favs = getFavorites();
+            const block = document.getElementById('favoritesBlock');
+            const list = document.getElementById('favoritesList');
+
+            if (!isSubscribed || favs.length === 0) {
+                block.classList.add('hidden');
+                return;
+            }
+
+            const favItems = getAllWorkouts().filter(item => favs.includes(item.link));
+            if (favItems.length === 0) {
+                block.classList.add('hidden');
+                return;
+            }
+
+            block.classList.remove('hidden');
+            list.innerHTML = '';
+            favItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'workout-card';
+                card.onclick = () => handleWorkoutClick(item.link);
+                card.innerHTML = `
+                    <div class="workout-header">
+                        <span class="workout-name">${item.title}</span>
+                        <span class="favorite-star" onclick="toggleFavorite('${item.link}', event)">★</span>
+                    </div>
+                    <div class="workout-meta">${item.categoryLabel} · ${item.meta}</div>
+                `;
+                list.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
